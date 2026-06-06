@@ -65,19 +65,30 @@ export function RouteInfoOverlay({ routeId, onClose, onRouteChange }: RouteInfoO
 
   return (
     <div>
-      <div className="rounded-xl border border-white/10 bg-gray-900/70 backdrop-blur-xl shadow-2xl">
+      <div className="rounded-2xl border border-white/10 bg-gray-950/80 backdrop-blur-xl overflow-hidden">
         {/* Header with route dropdown */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span
-              className="inline-block h-3 w-3 rounded-full shrink-0"
-              style={{ backgroundColor: route.lineColor }}
-            />
+        <div className="px-4 pt-4 pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <span
+                className="inline-block h-2 w-2 rounded-full shrink-0"
+                style={{ backgroundColor: route.lineColor }}
+              />
+              <span className="text-[10px] font-semibold tracking-widest uppercase shrink-0" style={{ color: route.lineColor }}>Route</span>
+            </div>
+            <button
+              onClick={onClose}
+              className="rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div className="mt-0.5">
             <Select value={routeId} onValueChange={(val) => onRouteChange?.(val)}>
-              <SelectTrigger className="h-auto border-none bg-transparent p-0 text-sm font-semibold text-white shadow-none ring-0 focus:ring-0 hover:text-blue-300 transition-colors [&>svg]:text-gray-400 [&>svg]:h-3.5 [&>svg]:w-3.5">
+              <SelectTrigger className="h-auto border-none bg-transparent p-0 text-base font-bold text-white shadow-none ring-0 focus:ring-0 hover:text-blue-300 transition-colors [&>svg]:text-white/40 [&>svg]:h-3 [&>svg]:w-3">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-white/10 backdrop-blur-xl">
+              <SelectContent className="bg-gray-950 border-white/10 backdrop-blur-xl">
                 {ROUTE_CONFIGS.map((r) => (
                   <SelectItem
                     key={r.id}
@@ -90,61 +101,62 @@ export function RouteInfoOverlay({ routeId, onClose, onRouteChange }: RouteInfoO
               </SelectContent>
             </Select>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-md p-1 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
 
+        {/* Divider */}
+        <div className="h-px bg-white/8 mx-4" />
+
         {/* Content */}
-        <div className="px-4 pb-4 space-y-3">
+        <div className="px-4 py-3 flex flex-col gap-2.5">
           {/* Stats grid */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <p className="text-xs text-gray-400 flex items-center gap-1">
-                <Truck className="h-3 w-3" /> Trucks
-              </p>
-              <p className="text-2xl font-bold text-white">{route.numTrucks}</p>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1.5">
+                <Truck className="h-3 w-3 text-white/40" />
+                <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">Trucks</span>
+              </div>
+              <p className="text-xl font-bold text-white">{route.numTrucks}</p>
             </div>
-            <div className="space-y-1">
-              <p className="text-xs text-gray-400 flex items-center gap-1">
-                <RouteIcon className="h-3 w-3" /> Distance
-              </p>
-              <p className="text-2xl font-bold text-white">{distKm.toFixed(1)} km</p>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1.5">
+                <RouteIcon className="h-3 w-3 text-white/40" />
+                <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">Distance</span>
+              </div>
+              <p className="text-xl font-bold text-white">{distKm.toFixed(1)} km</p>
             </div>
           </div>
 
           {/* From / To */}
-          <div className="space-y-2 rounded-lg bg-white/5 p-3">
-            <div className="flex items-start gap-2">
-              <MapPin className="h-3.5 w-3.5 mt-0.5 text-green-400" />
-              <div>
-                <p className="text-xs text-gray-400">Origin</p>
-                <p className="text-sm text-white">
-                  {route.from[1].toFixed(4)}°N, {route.from[0].toFixed(4)}°E
-                </p>
+          <div className="h-px bg-white/8" />
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <MapPin className="h-3 w-3 text-green-400 shrink-0" />
+                <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">Origin</span>
               </div>
+              <span className="text-[11px] text-white/70 font-medium">
+                {route.from[1].toFixed(4)}°N, {route.from[0].toFixed(4)}°E
+              </span>
             </div>
-            <div className="flex items-start gap-2">
-              <MapPin className="h-3.5 w-3.5 mt-0.5 text-red-400" />
-              <div>
-                <p className="text-xs text-gray-400">Destination</p>
-                <p className="text-sm text-white">
-                  {route.to[1].toFixed(4)}°N, {route.to[0].toFixed(4)}°E
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <MapPin className="h-3 w-3 text-red-400 shrink-0" />
+                <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">Destination</span>
               </div>
+              <span className="text-[11px] text-white/70 font-medium">
+                {route.to[1].toFixed(4)}°N, {route.to[0].toFixed(4)}°E
+              </span>
             </div>
           </div>
 
           {/* Status */}
-          <div className="flex items-center gap-2">
+          <div className="h-px bg-white/8" />
+          <div className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
             </span>
-            <span className="text-xs text-green-400 font-medium">Active — All trucks in transit</span>
+            <span className="text-[11px] text-green-400 font-medium">Active — All trucks in transit</span>
           </div>
         </div>
       </div>
@@ -157,13 +169,16 @@ export function EnergyOverlay({ visible }: { visible: boolean }) {
 
   return (
     <div className="absolute top-6 right-6 z-50 w-80 animate-in slide-in-from-right-4 fade-in duration-300">
-      <div className="rounded-xl border border-white/10 bg-gray-900/70 backdrop-blur-xl shadow-2xl">
+      <div className="rounded-2xl border border-white/10 bg-gray-950/80 backdrop-blur-xl overflow-hidden">
         <div className="px-4 pt-4 pb-3">
-          <p className="text-sm font-semibold text-white flex items-center gap-2">
-            <Zap className="h-4 w-4 text-yellow-400" /> Energy Delivered Today
-          </p>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <Zap className="h-3 w-3 text-yellow-400 shrink-0" />
+            <span className="text-[10px] text-yellow-400 font-semibold tracking-widest uppercase">Energy</span>
+          </div>
+          <h2 className="text-base font-bold text-white leading-tight">Energy Delivered Today</h2>
         </div>
-        <div className="px-4 pb-4">
+        <div className="h-px bg-white/8 mx-4" />
+        <div className="px-4 pb-4 pt-3">
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ENERGY_DATA} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
@@ -211,28 +226,31 @@ export function TrucksOverlay({ routeId, onTruckClick, selectedTruckIdx }: { rou
 
   return (
     <div>
-      <div className="rounded-xl border border-white/10 bg-gray-900/70 backdrop-blur-xl shadow-2xl">
-        <div className="px-4 pt-4 pb-2">
-          <p className="text-sm font-semibold text-white flex items-center gap-2">
-            <Truck className="h-4 w-4 text-blue-400" /> Fleet Status
-          </p>
+      <div className="rounded-2xl border border-white/10 bg-gray-950/80 backdrop-blur-xl overflow-hidden">
+        <div className="px-4 pt-4 pb-3">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <Truck className="h-3 w-3 text-blue-400 shrink-0" />
+            <span className="text-[10px] text-blue-400 font-semibold tracking-widest uppercase">Fleet</span>
+          </div>
+          <h2 className="text-base font-bold text-white leading-tight">Fleet Status</h2>
         </div>
-        <div className="px-4 pb-4 space-y-2 max-h-52 overflow-y-auto">
+        <div className="h-px bg-white/8 mx-4" />
+        <div className="px-4 py-3 flex flex-col gap-1.5 max-h-52 overflow-y-auto">
           {trucks.map((truck, idx) => (
             <div
               key={truck.id}
               onClick={() => onTruckClick?.(routeId, idx)}
-              className={`flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer transition-colors ${
+              className={`flex items-center justify-between rounded-xl px-3 py-2 cursor-pointer transition-colors ${
                 selectedTruckIdx === idx
                   ? "bg-blue-500/20 border border-blue-500/40"
                   : "bg-white/5 hover:bg-white/10"
               }`}
             >
               <div className="flex items-center gap-2">
-                <Truck className="h-3.5 w-3.5 text-gray-400" />
+                <Truck className="h-3 w-3 text-white/40" />
                 <div>
-                  <p className="text-xs font-medium text-white">{truck.id}</p>
-                  <p className="text-[10px] text-gray-400">{truck.plate}</p>
+                  <p className="text-[11px] font-medium text-white">{truck.id}</p>
+                  <p className="text-[10px] text-white/40">{truck.plate}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -246,10 +264,10 @@ export function TrucksOverlay({ routeId, onTruckClick, selectedTruckIdx }: { rou
                       }}
                     />
                   </div>
-                  <p className="text-[9px] text-gray-500 mt-0.5 text-right">{truck.battery}%</p>
+                  <p className="text-[9px] text-white/40 mt-0.5 text-right">{truck.battery}%</p>
                 </div>
                 <span
-                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
                     truck.status === "delivering"
                       ? "bg-green-500/10 text-green-400"
                       : truck.status === "returning"
@@ -290,24 +308,29 @@ export function TruckDetailOverlay({ routeId, truckIdx, onClose }: { routeId: st
   return (
     <div className="absolute top-6 right-6 z-50 w-80 animate-in slide-in-from-right-4 fade-in duration-300 flex flex-col gap-3">
       {/* Truck Info Card */}
-      <div className="rounded-xl border border-white/10 bg-gray-900/70 backdrop-blur-xl shadow-2xl">
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <p className="text-sm font-semibold text-white flex items-center gap-2">
-            <Truck className="h-4 w-4 text-blue-400" /> {truck.id}
-          </p>
-          <button
-            onClick={onClose}
-            className="rounded-md p-1 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
+      <div className="rounded-2xl border border-white/10 bg-gray-950/80 backdrop-blur-xl overflow-hidden">
+        <div className="px-4 pt-4 pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Truck className="h-3 w-3 text-blue-400 shrink-0" />
+              <span className="text-[10px] text-blue-400 font-semibold tracking-widest uppercase">Truck</span>
+            </div>
+            <button
+              onClick={onClose}
+              className="rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <h2 className="text-base font-bold text-white leading-tight mt-0.5">{truck.id}</h2>
         </div>
-        <div className="px-4 pb-4 space-y-3">
+        <div className="h-px bg-white/8 mx-4" />
+        <div className="px-4 py-3 flex flex-col gap-2.5">
           {/* Plate & Status */}
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-400">{truck.plate}</span>
+            <span className="text-[11px] text-white/40 font-medium">{truck.plate}</span>
             <span
-              className={`text-[10px] font-medium px-2 py-0.5 rounded ${
+              className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                 truck.status === "delivering"
                   ? "bg-green-500/10 text-green-400"
                   : truck.status === "returning"
@@ -321,32 +344,32 @@ export function TruckDetailOverlay({ routeId, truckIdx, onClose }: { routeId: st
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-lg bg-white/5 p-2 text-center">
-              <Battery className="h-3.5 w-3.5 text-green-400 mx-auto mb-1" />
-              <p className="text-lg font-bold text-white">{truck.battery}%</p>
-              <p className="text-[9px] text-gray-400">Battery</p>
+            <div className="rounded-xl bg-white/5 p-2 text-center">
+              <Battery className="h-3 w-3 text-green-400 mx-auto mb-1" />
+              <p className="text-base font-bold text-white">{truck.battery}%</p>
+              <p className="text-[9px] text-white/40 uppercase tracking-widest">Battery</p>
             </div>
-            <div className="rounded-lg bg-white/5 p-2 text-center">
-              <Gauge className="h-3.5 w-3.5 text-blue-400 mx-auto mb-1" />
-              <p className="text-lg font-bold text-white">{truck.speed}</p>
-              <p className="text-[9px] text-gray-400">km/h</p>
+            <div className="rounded-xl bg-white/5 p-2 text-center">
+              <Gauge className="h-3 w-3 text-blue-400 mx-auto mb-1" />
+              <p className="text-base font-bold text-white">{truck.speed}</p>
+              <p className="text-[9px] text-white/40 uppercase tracking-widest">km/h</p>
             </div>
-            <div className="rounded-lg bg-white/5 p-2 text-center">
-              <Clock className="h-3.5 w-3.5 text-purple-400 mx-auto mb-1" />
-              <p className="text-lg font-bold text-white">{truck.trips}</p>
-              <p className="text-[9px] text-gray-400">Trips</p>
+            <div className="rounded-xl bg-white/5 p-2 text-center">
+              <Clock className="h-3 w-3 text-purple-400 mx-auto mb-1" />
+              <p className="text-base font-bold text-white">{truck.trips}</p>
+              <p className="text-[9px] text-white/40 uppercase tracking-widest">Trips</p>
             </div>
           </div>
 
           {/* Battery bar */}
           <div>
-            <div className="flex justify-between text-[10px] text-gray-400 mb-1">
-              <span>Battery Level</span>
-              <span>{truck.battery}%</span>
+            <div className="flex justify-between mb-1">
+              <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">Battery Level</span>
+              <span className="text-[11px] text-white/70 font-medium">{truck.battery}%</span>
             </div>
-            <div className="h-2 rounded-full bg-white/10">
+            <div className="h-1.5 rounded-full bg-white/10">
               <div
-                className="h-2 rounded-full transition-all"
+                className="h-1.5 rounded-full transition-all"
                 style={{
                   width: `${truck.battery}%`,
                   backgroundColor: truck.battery > 50 ? "#4ade80" : truck.battery > 20 ? "#facc15" : "#f87171",
@@ -358,14 +381,17 @@ export function TruckDetailOverlay({ routeId, truckIdx, onClose }: { routeId: st
       </div>
 
       {/* Energy Delivered Chart for this truck */}
-      <div className="rounded-xl border border-white/10 bg-gray-900/70 backdrop-blur-xl shadow-2xl">
+      <div className="rounded-2xl border border-white/10 bg-gray-950/80 backdrop-blur-xl overflow-hidden">
         <div className="px-4 pt-4 pb-3">
-          <p className="text-sm font-semibold text-white flex items-center gap-2">
-            <Zap className="h-4 w-4 text-yellow-400" /> Energy Delivered — {truck.id}
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">Total: {truck.energyDelivered} kWh today</p>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <Zap className="h-3 w-3 text-yellow-400 shrink-0" />
+            <span className="text-[10px] text-yellow-400 font-semibold tracking-widest uppercase">Energy</span>
+          </div>
+          <h2 className="text-base font-bold text-white leading-tight">Energy Delivered — {truck.id}</h2>
+          <p className="text-[11px] text-white/40 mt-0.5">Total: {truck.energyDelivered} kWh today</p>
         </div>
-        <div className="px-4 pb-4">
+        <div className="h-px bg-white/8 mx-4" />
+        <div className="px-4 pb-4 pt-3">
           <div className="h-32">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={truckEnergyData} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
