@@ -7,7 +7,7 @@ export const ROUTE_CONFIGS = [
     to: [114.1577, 22.2808] as [number, number], // Central
     lineColor: "#60a5fa",
     truckColor: "#f59e0b",
-    numTrucks: 5,
+    numTrucks: 3,
   },
   {
     id: "yantian",
