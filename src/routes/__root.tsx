@@ -16,6 +16,7 @@ import { RoutesPanel } from "@/components/RoutesPanel";
 import { RouteInfoOverlay, TrucksOverlay } from "@/components/RouteInfoOverlay";
 import { TruckDetailOverlay } from "@/components/TruckDetailOverlay";
 import { SwitchTruck } from "@/components/SwitchTruck";
+import { TruckDetailRouteCard } from "@/components/TruckDetailRouteCard";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -175,6 +176,7 @@ function AppLayout() {
           <>
             <SwitchTruck routeId={selectedRoute} truckIdx={selectedTruck} onSwitch={(idx) => handleTruckClick(selectedRoute, idx)} />
             <TruckDetailOverlay routeId={selectedRoute} truckIdx={selectedTruck} onClose={handleCloseTruckDetail} />
+            <TruckDetailRouteCard routeId={selectedRoute} />
           </>
         )}
         {isMap && (

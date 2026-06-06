@@ -43,3 +43,33 @@ export const ROUTE_DESTINATIONS: Record<string, string> = {
   yantian: "Wan Chai, Hong Kong",
   nanshan: "Tsim Sha Tsui, Hong Kong",
 };
+
+export type StopType = "origin" | "stop" | "destination";
+
+export interface RouteStop {
+  type: StopType;
+  label: string;
+  address: string;
+  action?: string;
+}
+
+export const ROUTE_STOPS: Record<string, RouteStop[]> = {
+  sz: [
+    { type: "origin", label: "Origin", address: "Shenzhen Port" },
+    { type: "stop", label: "Stop 1", address: "Lok Ma Chau V2G Hub", action: "Charge to 80%" },
+    { type: "stop", label: "Stop 2", address: "Kwai Chung Grid Station", action: "Discharge to 30%" },
+    { type: "destination", label: "Destination", address: "Central, Hong Kong" },
+  ],
+  yantian: [
+    { type: "origin", label: "Origin", address: "Yantian Port" },
+    { type: "stop", label: "Stop 1", address: "Sha Tau Kok V2G Hub", action: "Charge to 75%" },
+    { type: "stop", label: "Stop 2", address: "Kwun Tong Grid Station", action: "Discharge to 25%" },
+    { type: "destination", label: "Destination", address: "Wan Chai, Hong Kong" },
+  ],
+  nanshan: [
+    { type: "origin", label: "Origin", address: "Nanshan Port" },
+    { type: "stop", label: "Stop 1", address: "Shekou V2G Hub", action: "Charge to 80%" },
+    { type: "stop", label: "Stop 2", address: "Stonecutters Grid Station", action: "Discharge to 30%" },
+    { type: "destination", label: "Destination", address: "Tsim Sha Tsui, Hong Kong" },
+  ],
+};
