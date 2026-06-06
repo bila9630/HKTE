@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { RoutePlanerCard } from "@/components/RoutePlanerCard";
 
 export const Route = createFileRoute("/test")({
   component: Test,
@@ -32,26 +33,18 @@ function Test() {
   if (error) return <p className="p-4 text-red-500">Error: {error}</p>;
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Test Table</h1>
-      <table className="border-collapse w-full">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border px-4 py-2 text-left">ID</th>
-            <th className="border px-4 py-2 text-left">Created At</th>
-            <th className="border px-4 py-2 text-left">Name</th>
-          </tr>
-        </thead>
-        <tbody>
+    <>
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-4">Test Table</h1>
+        <div className="space-y-2">
           {rows.map((row) => (
-            <tr key={row.id}>
-              <td className="border px-4 py-2">{row.id}</td>
-              <td className="border px-4 py-2">{new Date(row.created_at).toLocaleString()}</td>
-              <td className="border px-4 py-2">{row.name}</td>
-            </tr>
+            <p key={row.id}>
+              {row.id} — {new Date(row.created_at).toLocaleString()} — {row.name}
+            </p>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </div>
+      </div>
+      <RoutePlanerCard />
+    </>
   );
 }
