@@ -50,7 +50,7 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
         container: mapContainerRef.current,
         style: "mapbox://styles/mapbox/dark-v11",
         center: [0, 20],
-        zoom: 1.5,
+        zoom: 2,
         projection: { name: "globe" },
         attributionControl: false,
         renderWorldCopies: false,
