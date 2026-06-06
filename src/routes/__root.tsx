@@ -178,8 +178,10 @@ function AppLayout() {
             <MapDock isDark={isDark} toggle={toggle} onOverviewClick={() => router.navigate({ to: '/dashboard' })} onRoutesClick={() => setRoutesOpen(true)} />
           </div>
         )}
+        {isMap && (routesOpen || !selectedRoute) && (
+          <RoutesPanel open={true} onOpenChange={(v) => { if (!v && selectedRoute) setRoutesOpen(false); }} onRouteClick={handleRouteClick} />
+        )}
       </div>
-      <RoutesPanel open={routesOpen} onOpenChange={setRoutesOpen} onRouteClick={handleRouteClick} />
     </div>
   );
 }
