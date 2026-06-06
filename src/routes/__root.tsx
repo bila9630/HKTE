@@ -13,7 +13,8 @@ import { MapActionsProvider, useMapActions } from "@/context/MapActionsContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MapDock } from "@/components/MapDock";
 import { RoutesPanel } from "@/components/RoutesPanel";
-import { RouteInfoOverlay, TrucksOverlay, TruckDetailOverlay } from "@/components/RouteInfoOverlay";
+import { RouteInfoOverlay, TrucksOverlay } from "@/components/RouteInfoOverlay";
+import { TruckDetailOverlay } from "@/components/TruckDetailOverlay";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";

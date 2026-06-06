@@ -13,6 +13,8 @@ export const TRUCK_DATA: Record<
     { id: "SZ-01", plate: "粤B·T2841", battery: 78, status: "delivering", speed: 45, trips: 3 },
     { id: "SZ-02", plate: "粤B·K9012", battery: 45, status: "returning", speed: 52, trips: 2 },
     { id: "SZ-03", plate: "粤B·M3356", battery: 92, status: "delivering", speed: 38, trips: 4 },
+    { id: "SZ-04", plate: "粤B·P5567", battery: 61, status: "delivering", speed: 49, trips: 2 },
+    { id: "SZ-05", plate: "粤B·Q7723", battery: 15, status: "charging", speed: 0, trips: 1 },
   ],
   yantian: [
     { id: "YT-01", plate: "粤B·D4418", battery: 88, status: "delivering", speed: 41, trips: 4 },
