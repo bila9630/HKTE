@@ -7,10 +7,12 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { DarkModeProvider, useDarkModeContext } from "@/context/DarkModeContext";
 import { MapActionsProvider, useMapActions } from "@/context/MapActionsContext";
 import { MapDock } from "@/components/MapDock";
+import { RoutesPanel } from "@/components/RoutesPanel";
+import { RouteInfoOverlay } from "@/components/RouteInfoOverlay";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -118,13 +120,23 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
-  const { onOverviewClick } = useMapActions();
+  const { onOverviewClick, focusRoute } = useMapActions();
+  const [routesOpen, setRoutesOpen] = useState(false);
+  const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
+
+  const handleRouteClick = (routeId: string) => {
+    focusRoute?.(routeId);
+    setSelectedRoute(routeId);
+  };
+
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <Outlet />
+      <RouteInfoOverlay routeId={selectedRoute} onClose={() => setSelectedRoute(null)} />
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <MapDock isDark={isDark} toggle={toggle} onOverviewClick={onOverviewClick} />
+        <MapDock isDark={isDark} toggle={toggle} onOverviewClick={onOverviewClick} onRoutesClick={() => setRoutesOpen(true)} />
       </div>
+      <RoutesPanel open={routesOpen} onOpenChange={setRoutesOpen} onRouteClick={handleRouteClick} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ const HK_CENTER: [number, number] = [114.1694, 22.3193];
 
 export interface MapHandle {
   flyToHongKong: () => void;
+  focusRoute: (routeId: string) => void;
 }
 
 const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
@@ -27,6 +28,29 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
         duration: 3000,
         essential: true,
       });
+    },
+    focusRoute: (routeId: string) => {
+      const map = mapRef.current;
+      if (!map) return;
+      const cfg = ROUTE_CONFIGS.find((r) => r.id === routeId);
+      if (!cfg) return;
+
+      // Reset all route lines and truck visibility
+      ROUTE_CONFIGS.forEach((r) => {
+        if (map.getLayer(`route-line-${r.id}`)) {
+          map.setPaintProperty(`route-line-${r.id}`, "line-opacity", r.id === routeId ? 1 : 0.2);
+          map.setPaintProperty(`route-line-${r.id}`, "line-width", r.id === routeId ? 5 : 2);
+        }
+        if (map.getLayer(`trucks-layer-${r.id}`)) {
+          map.setLayoutProperty(`trucks-layer-${r.id}`, "visibility", r.id === routeId ? "visible" : "none");
+        }
+      });
+
+      // Fit bounds to the selected route
+      const bounds = new mapboxgl.LngLatBounds();
+      bounds.extend(cfg.from);
+      bounds.extend(cfg.to);
+      map.fitBounds(bounds, { padding: 100, duration: 2000, pitch: 45 });
     },
   }));
 

@@ -17,12 +17,17 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const mapRef = useRef<MapHandle>(null);
-  const { setOverviewClick } = useMapActions();
+  const { setOverviewClick, setFocusRoute } = useMapActions();
 
   useEffect(() => {
     setOverviewClick(() => mapRef.current?.flyToHongKong());
     return () => setOverviewClick(undefined);
   }, [setOverviewClick]);
+
+  useEffect(() => {
+    setFocusRoute((routeId: string) => mapRef.current?.focusRoute(routeId));
+    return () => setFocusRoute(undefined);
+  }, [setFocusRoute]);
 
   return <Map ref={mapRef} />;
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { HomeIcon, ClockIcon, FileTextIcon, SunIcon, MoonIcon } from "lucide-react";
+import { HomeIcon, LocateIcon, FileTextIcon, SunIcon, MoonIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -10,12 +10,13 @@ interface MapDockProps {
   isDark?: boolean;
   toggle?: () => void;
   onOverviewClick?: () => void;
+  onRoutesClick?: () => void;
 }
 
-export function MapDock({ isDark, toggle, onOverviewClick }: MapDockProps) {
+export function MapDock({ isDark, toggle, onOverviewClick, onRoutesClick }: MapDockProps) {
   const navItems = [
     { icon: HomeIcon, label: "Overview", onClick: onOverviewClick },
-    { icon: ClockIcon, label: "Timeplan", onClick: undefined },
+    { icon: LocateIcon, label: "Routes", onClick: onRoutesClick },
     { icon: FileTextIcon, label: "Document", onClick: undefined },
   ];
 
