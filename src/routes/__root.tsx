@@ -12,7 +12,7 @@ import { DarkModeProvider, useDarkModeContext } from "@/context/DarkModeContext"
 import { MapActionsProvider, useMapActions } from "@/context/MapActionsContext";
 import { MapDock } from "@/components/MapDock";
 import { RoutesPanel } from "@/components/RoutesPanel";
-import { RouteInfoOverlay } from "@/components/RouteInfoOverlay";
+import { RouteInfoOverlay, EnergyOverlay } from "@/components/RouteInfoOverlay";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -132,7 +132,8 @@ function AppLayout() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <Outlet />
-      <RouteInfoOverlay routeId={selectedRoute} onClose={() => setSelectedRoute(null)} />
+      <RouteInfoOverlay routeId={selectedRoute} onClose={() => setSelectedRoute(null)} onRouteChange={handleRouteClick} />
+      <EnergyOverlay visible={!!selectedRoute} />
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
         <MapDock isDark={isDark} toggle={toggle} onOverviewClick={onOverviewClick} onRoutesClick={() => setRoutesOpen(true)} />
       </div>

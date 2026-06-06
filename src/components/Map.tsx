@@ -50,7 +50,7 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
       const bounds = new mapboxgl.LngLatBounds();
       bounds.extend(cfg.from);
       bounds.extend(cfg.to);
-      map.fitBounds(bounds, { padding: 100, duration: 2000, pitch: 45 });
+      map.fitBounds(bounds, { padding: 100, duration: 2000, pitch: 0 });
     },
   }));
 
@@ -111,7 +111,7 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
         map.flyTo({
           center: HK_CENTER,
           zoom: 9.5,
-          pitch: 45,
+          pitch: 0,
           bearing: 0,
           duration: 3000,
           essential: true,
