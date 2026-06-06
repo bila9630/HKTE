@@ -14,16 +14,34 @@ export interface MapHandle {
   followTruck: (routeId: string, truckIdx: number) => void;
 }
 
-const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
+interface MapProps {
+  onTruckClick?: (routeId: string, truckIdx: number) => void;
+}
+
+const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const followingRef = useRef<{ routeIdx: number; truckIdx: number } | null>(null);
   const routeStateRef = useRef<{ coords: [number, number][]; progress: number[]; directions: (1 | -1)[] }[]>([]);
+  const onTruckClickRef = useRef(onTruckClick);
+  onTruckClickRef.current = onTruckClick;
 
   useImperativeHandle(ref, () => ({
     flyToHongKong: () => {
-      if (!mapRef.current) return;
-      mapRef.current.flyTo({
+      const map = mapRef.current;
+      if (!map) return;
+      followingRef.current = null;
+      // Reset all route lines to default
+      ROUTE_CONFIGS.forEach((r) => {
+        if (map.getLayer(`route-line-${r.id}`)) {
+          map.setPaintProperty(`route-line-${r.id}`, "line-opacity", 0.5);
+          map.setPaintProperty(`route-line-${r.id}`, "line-width", 2);
+        }
+        if (map.getLayer(`trucks-layer-${r.id}`)) {
+          map.setLayoutProperty(`trucks-layer-${r.id}`, "visibility", "visible");
+        }
+      });
+      map.flyTo({
         center: HK_CENTER,
         zoom: 11,
         pitch: 0,
@@ -37,6 +55,9 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
       if (!map) return;
       const cfg = ROUTE_CONFIGS.find((r) => r.id === routeId);
       if (!cfg) return;
+
+      // Stop following
+      followingRef.current = null;
 
       // Reset all route lines and truck visibility
       ROUTE_CONFIGS.forEach((r) => {
@@ -65,11 +86,13 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
       // Get the truck's current position from state
       const state = routeStateRef.current[routeIdx];
       if (state && truckIdx < state.progress.length) {
-        const { position } = getPositionAndBearing(state.coords, state.progress[truckIdx]);
+        const { position, bearing } = getPositionAndBearing(state.coords, state.progress[truckIdx]);
+        const truckBearing = state.directions[truckIdx] === 1 ? bearing : bearing + 180;
         map.flyTo({
           center: position,
           zoom: 18,
           pitch: 72,
+          bearing: truckBearing,
           duration: 1500,
           essential: true,
         });
@@ -225,12 +248,16 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
               if (!feature) return;
               const truckIdx = feature.properties?.id ?? 0;
               followingRef.current = { routeIdx: idx, truckIdx };
+              // Notify parent
+              onTruckClickRef.current?.(cfg.id, truckIdx);
               // Zoom in close with 3D buildings view
               const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+              const truckBearing = feature.properties?.bearing ?? 0;
               map.flyTo({
                 center: coords,
                 zoom: 18,
                 pitch: 72,
+                bearing: truckBearing,
                 duration: 1500,
                 essential: true,
               });

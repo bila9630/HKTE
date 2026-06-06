@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const mapRef = useRef<MapHandle>(null);
-  const { setOverviewClick, setFocusRoute, setFollowTruck } = useMapActions();
+  const { setOverviewClick, setFocusRoute, setFollowTruck, onMapTruckClick } = useMapActions();
 
   useEffect(() => {
     setOverviewClick(() => mapRef.current?.flyToHongKong());
@@ -34,5 +34,5 @@ function Index() {
     return () => setFollowTruck(undefined);
   }, [setFollowTruck]);
 
-  return <Map ref={mapRef} />;
+  return <Map ref={mapRef} onTruckClick={(routeId, truckIdx) => onMapTruckClick?.(routeId, truckIdx)} />;
 }
