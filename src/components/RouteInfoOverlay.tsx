@@ -1,4 +1,4 @@
-import { X, Truck, MapPin, Route as RouteIcon, Zap, Battery, Clock, Gauge } from "lucide-react";
+import { X, Truck, MapPin, Route as RouteIcon, Battery, Clock, Gauge } from "lucide-react";
 import { ROUTE_CONFIGS } from "@/lib/truckRoutes";
 import {
   Select,
@@ -7,36 +7,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-
-const ENERGY_DATA = [
-  { time: "6am", kwh: 12 },
-  { time: "8am", kwh: 28 },
-  { time: "10am", kwh: 45 },
-  { time: "12pm", kwh: 67 },
-  { time: "2pm", kwh: 89 },
-  { time: "4pm", kwh: 124 },
-  { time: "6pm", kwh: 156 },
-];
 
 // Mock truck data per route
-const TRUCK_DATA: Record<string, { id: string; plate: string; battery: number; status: "delivering" | "returning" | "charging"; energyDelivered: number; speed: number; trips: number }[]> = {
+const TRUCK_DATA: Record<
+  string,
+  {
+    id: string;
+    plate: string;
+    battery: number;
+    status: "delivering" | "returning" | "charging";
+    speed: number;
+    trips: number;
+  }[]
+> = {
   sz: [
-    { id: "SZ-01", plate: "粤B·T2841", battery: 78, status: "delivering", energyDelivered: 84, speed: 45, trips: 3 },
-    { id: "SZ-02", plate: "粤B·K9012", battery: 45, status: "returning", energyDelivered: 62, speed: 52, trips: 2 },
-    { id: "SZ-03", plate: "粤B·M3356", battery: 92, status: "delivering", energyDelivered: 105, speed: 38, trips: 4 },
-    { id: "SZ-04", plate: "粤B·R7721", battery: 15, status: "charging", energyDelivered: 41, speed: 0, trips: 1 },
-    { id: "SZ-05", plate: "粤B·A5509", battery: 63, status: "delivering", energyDelivered: 73, speed: 47, trips: 3 },
+    { id: "SZ-01", plate: "粤B·T2841", battery: 78, status: "delivering", speed: 45, trips: 3 },
+    { id: "SZ-02", plate: "粤B·K9012", battery: 45, status: "returning", speed: 52, trips: 2 },
+    { id: "SZ-03", plate: "粤B·M3356", battery: 92, status: "delivering", speed: 38, trips: 4 },
+    { id: "SZ-04", plate: "粤B·R7721", battery: 15, status: "charging", speed: 0, trips: 1 },
+    { id: "SZ-05", plate: "粤B·A5509", battery: 63, status: "delivering", speed: 47, trips: 3 },
   ],
   yantian: [
-    { id: "YT-01", plate: "粤B·D4418", battery: 88, status: "delivering", energyDelivered: 96, speed: 41, trips: 4 },
-    { id: "YT-02", plate: "粤B·F6623", battery: 34, status: "returning", energyDelivered: 55, speed: 58, trips: 2 },
-    { id: "YT-03", plate: "粤B·H1190", battery: 71, status: "delivering", energyDelivered: 78, speed: 43, trips: 3 },
+    { id: "YT-01", plate: "粤B·D4418", battery: 88, status: "delivering", speed: 41, trips: 4 },
+    { id: "YT-02", plate: "粤B·F6623", battery: 34, status: "returning", speed: 58, trips: 2 },
+    { id: "YT-03", plate: "粤B·H1190", battery: 71, status: "delivering", speed: 43, trips: 3 },
   ],
   nanshan: [
-    { id: "NS-01", plate: "粤B·J8845", battery: 56, status: "delivering", energyDelivered: 67, speed: 39, trips: 2 },
-    { id: "NS-02", plate: "粤B·L2278", battery: 22, status: "charging", energyDelivered: 34, speed: 0, trips: 1 },
-    { id: "NS-03", plate: "粤B·N9934", battery: 81, status: "returning", energyDelivered: 88, speed: 51, trips: 3 },
+    { id: "NS-01", plate: "粤B·J8845", battery: 56, status: "delivering", speed: 39, trips: 2 },
+    { id: "NS-02", plate: "粤B·L2278", battery: 22, status: "charging", speed: 0, trips: 1 },
+    { id: "NS-03", plate: "粤B·N9934", battery: 81, status: "returning", speed: 51, trips: 3 },
   ],
 };
 
@@ -164,61 +163,15 @@ export function RouteInfoOverlay({ routeId, onClose, onRouteChange }: RouteInfoO
   );
 }
 
-export function EnergyOverlay({ visible }: { visible: boolean }) {
-  if (!visible) return null;
-
-  return (
-    <div className="absolute top-6 right-6 z-50 w-80 animate-in slide-in-from-right-4 fade-in duration-300">
-      <div className="rounded-2xl border border-white/10 bg-gray-950/80 backdrop-blur-xl overflow-hidden">
-        <div className="px-4 pt-4 pb-3">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <Zap className="h-3 w-3 text-yellow-400 shrink-0" />
-            <span className="text-[10px] text-yellow-400 font-semibold tracking-widest uppercase">Energy</span>
-          </div>
-          <h2 className="text-base font-bold text-white leading-tight">Energy Delivered Today</h2>
-        </div>
-        <div className="h-px bg-white/8 mx-4" />
-        <div className="px-4 pb-4 pt-3">
-          <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ENERGY_DATA} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
-                <XAxis
-                  dataKey="time"
-                  stroke="#6b7280"
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#6b7280"
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                  unit=" kWh"
-                  width={50}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "rgba(17, 24, 39, 0.9)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "0.5rem",
-                    fontSize: "12px",
-                    color: "#fff",
-                  }}
-                  labelStyle={{ color: "#9ca3af" }}
-                  formatter={(value: number) => [`${value} kWh`, "Sold"]}
-                />
-                <Bar dataKey="kwh" fill="#facc15" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function TrucksOverlay({ routeId, onTruckClick, selectedTruckIdx }: { routeId: string | null; onTruckClick?: (routeId: string, truckIdx: number) => void; selectedTruckIdx?: number | null }) {
+export function TrucksOverlay({
+  routeId,
+  onTruckClick,
+  selectedTruckIdx,
+}: {
+  routeId: string | null;
+  onTruckClick?: (routeId: string, truckIdx: number) => void;
+  selectedTruckIdx?: number | null;
+}) {
   if (!routeId) return null;
 
   const trucks = TRUCK_DATA[routeId];
@@ -294,17 +247,6 @@ export function TruckDetailOverlay({ routeId, truckIdx, onClose }: { routeId: st
 
   const truck = trucks[truckIdx];
 
-  // Mock energy data for this specific truck
-  const truckEnergyData = [
-    { time: "6am", kwh: Math.round(truck.energyDelivered * 0.08) },
-    { time: "8am", kwh: Math.round(truck.energyDelivered * 0.18) },
-    { time: "10am", kwh: Math.round(truck.energyDelivered * 0.32) },
-    { time: "12pm", kwh: Math.round(truck.energyDelivered * 0.5) },
-    { time: "2pm", kwh: Math.round(truck.energyDelivered * 0.68) },
-    { time: "4pm", kwh: Math.round(truck.energyDelivered * 0.85) },
-    { time: "6pm", kwh: truck.energyDelivered },
-  ];
-
   return (
     <div className="absolute top-6 right-6 z-50 w-80 animate-in slide-in-from-right-4 fade-in duration-300 flex flex-col gap-3">
       {/* Truck Info Card */}
@@ -376,54 +318,6 @@ export function TruckDetailOverlay({ routeId, truckIdx, onClose }: { routeId: st
                 }}
               />
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Energy Delivered Chart for this truck */}
-      <div className="rounded-2xl border border-white/10 bg-gray-950/80 backdrop-blur-xl overflow-hidden">
-        <div className="px-4 pt-4 pb-3">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <Zap className="h-3 w-3 text-yellow-400 shrink-0" />
-            <span className="text-[10px] text-yellow-400 font-semibold tracking-widest uppercase">Energy</span>
-          </div>
-          <h2 className="text-base font-bold text-white leading-tight">Energy Delivered — {truck.id}</h2>
-          <p className="text-[11px] text-white/40 mt-0.5">Total: {truck.energyDelivered} kWh today</p>
-        </div>
-        <div className="h-px bg-white/8 mx-4" />
-        <div className="px-4 pb-4 pt-3">
-          <div className="h-32">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={truckEnergyData} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
-                <XAxis
-                  dataKey="time"
-                  stroke="#6b7280"
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#6b7280"
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                  unit=" kWh"
-                  width={45}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "rgba(17, 24, 39, 0.9)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "0.5rem",
-                    fontSize: "12px",
-                    color: "#fff",
-                  }}
-                  labelStyle={{ color: "#9ca3af" }}
-                  formatter={(value: number) => [`${value} kWh`, "Delivered"]}
-                />
-                <Bar dataKey="kwh" fill="#facc15" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
           </div>
         </div>
       </div>

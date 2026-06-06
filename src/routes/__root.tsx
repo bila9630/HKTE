@@ -13,7 +13,7 @@ import { MapActionsProvider, useMapActions } from "@/context/MapActionsContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MapDock } from "@/components/MapDock";
 import { RoutesPanel } from "@/components/RoutesPanel";
-import { RouteInfoOverlay, EnergyOverlay, TrucksOverlay, TruckDetailOverlay } from "@/components/RouteInfoOverlay";
+import { RouteInfoOverlay, TrucksOverlay, TruckDetailOverlay } from "@/components/RouteInfoOverlay";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -172,7 +172,6 @@ function AppLayout() {
         {isMap && selectedRoute && selectedTruck !== null && (
           <TruckDetailOverlay routeId={selectedRoute} truckIdx={selectedTruck} onClose={handleCloseTruckDetail} />
         )}
-        {isMap && selectedRoute && selectedTruck === null && <EnergyOverlay visible={true} />}
         {isMap && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50">
             <MapDock isDark={isDark} toggle={toggle} onOverviewClick={() => router.navigate({ to: '/dashboard' })} onRoutesClick={() => setRoutesOpen(true)} />
