@@ -2,9 +2,10 @@ import { useEffect, useRef, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-// Replace with your Mapbox access token.
-// Get one for free at https://account.mapbox.com/access-tokens/
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || "";
+// Mapbox access token — publishable key, safe for client-side use
+const MAPBOX_TOKEN =
+  import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ||
+  "pk.eyJ1IjoibWFwYm94OTYzMCIsImEiOiJjbWh4Y2lpOXAwMHZiMmxzOWVtaW1weTZvIn0.1lj2lcLygace2d9gcLnVMA";
 
 export default function Globe() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
