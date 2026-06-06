@@ -1,5 +1,6 @@
 import { X, Truck, MapPin, Route as RouteIcon, Battery, Clock, Gauge } from "lucide-react";
 import { ROUTE_CONFIGS } from "@/lib/truckRoutes";
+import { TRUCK_DATA, ROUTE_NAMES, ROUTE_ORIGINS, ROUTE_DESTINATIONS } from "@/lib/routeConstants";
 import {
   Select,
   SelectContent,
@@ -8,48 +9,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Mock truck data per route
-const TRUCK_DATA: Record<
-  string,
-  {
-    id: string;
-    plate: string;
-    battery: number;
-    status: "delivering" | "returning" | "charging";
-    speed: number;
-    trips: number;
-  }[]
-> = {
-  sz: [
-    { id: "SZ-01", plate: "粤B·T2841", battery: 78, status: "delivering", speed: 45, trips: 3 },
-    { id: "SZ-02", plate: "粤B·K9012", battery: 45, status: "returning", speed: 52, trips: 2 },
-    { id: "SZ-03", plate: "粤B·M3356", battery: 92, status: "delivering", speed: 38, trips: 4 },
-    { id: "SZ-04", plate: "粤B·R7721", battery: 15, status: "charging", speed: 0, trips: 1 },
-    { id: "SZ-05", plate: "粤B·A5509", battery: 63, status: "delivering", speed: 47, trips: 3 },
-  ],
-  yantian: [
-    { id: "YT-01", plate: "粤B·D4418", battery: 88, status: "delivering", speed: 41, trips: 4 },
-    { id: "YT-02", plate: "粤B·F6623", battery: 34, status: "returning", speed: 58, trips: 2 },
-    { id: "YT-03", plate: "粤B·H1190", battery: 71, status: "delivering", speed: 43, trips: 3 },
-  ],
-  nanshan: [
-    { id: "NS-01", plate: "粤B·J8845", battery: 56, status: "delivering", speed: 39, trips: 2 },
-    { id: "NS-02", plate: "粤B·L2278", battery: 22, status: "charging", speed: 0, trips: 1 },
-    { id: "NS-03", plate: "粤B·N9934", battery: 81, status: "returning", speed: 51, trips: 3 },
-  ],
-};
-
 interface RouteInfoOverlayProps {
   routeId: string | null;
   onClose: () => void;
   onRouteChange?: (routeId: string) => void;
 }
-
-const ROUTE_NAMES: Record<string, string> = {
-  sz: "Shenzhen → Central",
-  yantian: "Yantian → Wan Chai",
-  nanshan: "Nanshan → Tsim Sha Tsui",
-};
 
 export function RouteInfoOverlay({ routeId, onClose, onRouteChange }: RouteInfoOverlayProps) {
   if (!routeId) return null;
@@ -134,7 +98,7 @@ export function RouteInfoOverlay({ routeId, onClose, onRouteChange }: RouteInfoO
                 <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">Origin</span>
               </div>
               <span className="text-[11px] text-white/70 font-medium">
-                {route.from[1].toFixed(4)}°N, {route.from[0].toFixed(4)}°E
+                {ROUTE_ORIGINS[routeId] ?? routeId}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -143,19 +107,9 @@ export function RouteInfoOverlay({ routeId, onClose, onRouteChange }: RouteInfoO
                 <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">Destination</span>
               </div>
               <span className="text-[11px] text-white/70 font-medium">
-                {route.to[1].toFixed(4)}°N, {route.to[0].toFixed(4)}°E
+                {ROUTE_DESTINATIONS[routeId] ?? routeId}
               </span>
             </div>
-          </div>
-
-          {/* Status */}
-          <div className="h-px bg-white/8" />
-          <div className="flex items-center gap-1.5">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
-            </span>
-            <span className="text-[11px] text-green-400 font-medium">Active — All trucks in transit</span>
           </div>
         </div>
       </div>
@@ -300,23 +254,6 @@ export function TruckDetailOverlay({ routeId, truckIdx, onClose }: { routeId: st
               <Clock className="h-3 w-3 text-purple-400 mx-auto mb-1" />
               <p className="text-base font-bold text-white">{truck.trips}</p>
               <p className="text-[9px] text-white/40 uppercase tracking-widest">Trips</p>
-            </div>
-          </div>
-
-          {/* Battery bar */}
-          <div>
-            <div className="flex justify-between mb-1">
-              <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">Battery Level</span>
-              <span className="text-[11px] text-white/70 font-medium">{truck.battery}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-white/10">
-              <div
-                className="h-1.5 rounded-full transition-all"
-                style={{
-                  width: `${truck.battery}%`,
-                  backgroundColor: truck.battery > 50 ? "#4ade80" : truck.battery > 20 ? "#facc15" : "#f87171",
-                }}
-              />
             </div>
           </div>
         </div>
