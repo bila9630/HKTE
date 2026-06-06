@@ -15,6 +15,7 @@ import { MapDock } from "@/components/MapDock";
 import { RoutesPanel } from "@/components/RoutesPanel";
 import { RouteInfoOverlay, TrucksOverlay } from "@/components/RouteInfoOverlay";
 import { TruckDetailOverlay } from "@/components/TruckDetailOverlay";
+import { SwitchTruck } from "@/components/SwitchTruck";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -164,14 +165,17 @@ function AppLayout() {
       {!isMap && <AppSidebar isDark={isDark} toggle={toggle} onRoutesClick={() => setRoutesOpen(true)} />}
       <div className="relative flex-1 overflow-hidden">
         <Outlet />
-        {isMap && selectedRoute && (
+        {isMap && selectedRoute && selectedTruck === null && (
           <div className="absolute top-6 left-6 z-50 flex flex-col gap-3 w-72 animate-in slide-in-from-left-4 fade-in duration-300">
             <RouteInfoOverlay routeId={selectedRoute} onClose={() => { setSelectedRoute(null); setSelectedTruck(null); onOverviewClick?.(); }} onRouteChange={handleRouteClick} />
             <TrucksOverlay routeId={selectedRoute} onTruckClick={handleTruckClick} selectedTruckIdx={selectedTruck} />
           </div>
         )}
         {isMap && selectedRoute && selectedTruck !== null && (
-          <TruckDetailOverlay routeId={selectedRoute} truckIdx={selectedTruck} onClose={handleCloseTruckDetail} />
+          <>
+            <SwitchTruck routeId={selectedRoute} truckIdx={selectedTruck} onSwitch={(idx) => handleTruckClick(selectedRoute, idx)} />
+            <TruckDetailOverlay routeId={selectedRoute} truckIdx={selectedTruck} onClose={handleCloseTruckDetail} />
+          </>
         )}
         {isMap && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50">
