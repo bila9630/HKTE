@@ -1,7 +1,7 @@
 import { useEffect, useImperativeHandle, useRef, forwardRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { ROUTE_CONFIGS, SPEED, buildTruckCollection, loadNavArrow } from "@/lib/truckRoutes";
+import { ROUTE_CONFIGS, SPEED, buildTruckCollection, getPositionAndBearing, loadNavArrow } from "@/lib/truckRoutes";
 
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoibWFwYm94OTYzMCIsImEiOiJjbWh4Y2lpOXAwMHZiMmxzOWVtaW1weTZvIn0.1lj2lcLygace2d9gcLnVMA";
@@ -11,11 +11,14 @@ const HK_CENTER: [number, number] = [114.1694, 22.3193];
 export interface MapHandle {
   flyToHongKong: () => void;
   focusRoute: (routeId: string) => void;
+  followTruck: (routeId: string, truckIdx: number) => void;
 }
 
 const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const followingRef = useRef<{ routeIdx: number; truckIdx: number } | null>(null);
+  const routeStateRef = useRef<{ coords: [number, number][]; progress: number[]; directions: (1 | -1)[] }[]>([]);
 
   useImperativeHandle(ref, () => ({
     flyToHongKong: () => {
@@ -51,6 +54,26 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
       bounds.extend(cfg.from);
       bounds.extend(cfg.to);
       map.fitBounds(bounds, { padding: 100, duration: 2000, pitch: 0 });
+    },
+    followTruck: (routeId: string, truckIdx: number) => {
+      const map = mapRef.current;
+      if (!map) return;
+      const routeIdx = ROUTE_CONFIGS.findIndex((r) => r.id === routeId);
+      if (routeIdx === -1) return;
+      followingRef.current = { routeIdx, truckIdx };
+
+      // Get the truck's current position from state
+      const state = routeStateRef.current[routeIdx];
+      if (state && truckIdx < state.progress.length) {
+        const { position } = getPositionAndBearing(state.coords, state.progress[truckIdx]);
+        map.flyTo({
+          center: position,
+          zoom: 18,
+          pitch: 72,
+          duration: 1500,
+          essential: true,
+        });
+      }
     },
   }));
 
@@ -132,6 +155,7 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
               (_, i) => (i % 2 === 0 ? 1 : -1) as 1 | -1,
             ),
           }));
+          routeStateRef.current = routeState;
 
           ROUTE_CONFIGS.forEach((cfg, idx) => {
             const state = routeState[idx];
@@ -194,6 +218,41 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
               .catch((err) => console.error(`[Map] Directions fetch failed for ${cfg.id}:`, err));
           });
 
+          // Click on truck to follow it
+          ROUTE_CONFIGS.forEach((cfg, idx) => {
+            map.on("click", `trucks-layer-${cfg.id}`, (e) => {
+              const feature = e.features?.[0];
+              if (!feature) return;
+              const truckIdx = feature.properties?.id ?? 0;
+              followingRef.current = { routeIdx: idx, truckIdx };
+              // Zoom in close with 3D buildings view
+              const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+              map.flyTo({
+                center: coords,
+                zoom: 18,
+                pitch: 72,
+                duration: 1500,
+                essential: true,
+              });
+            });
+            map.on("mouseenter", `trucks-layer-${cfg.id}`, () => {
+              map.getCanvas().style.cursor = "pointer";
+            });
+            map.on("mouseleave", `trucks-layer-${cfg.id}`, () => {
+              map.getCanvas().style.cursor = "";
+            });
+          });
+
+          // Click on empty map to stop following
+          map.on("click", (e) => {
+            const features = map.queryRenderedFeatures(e.point, {
+              layers: ROUTE_CONFIGS.map((cfg) => `trucks-layer-${cfg.id}`),
+            });
+            if (!features.length) {
+              followingRef.current = null;
+            }
+          });
+
           let lastTime: number | null = null;
           function animate(timestamp: number) {
             if (lastTime === null) lastTime = timestamp;
@@ -202,8 +261,11 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
 
             ROUTE_CONFIGS.forEach((cfg, idx) => {
               const state = routeState[idx];
+              // Slow down trucks on the followed route to a realistic speed
+              const isFollowedRoute = followingRef.current?.routeIdx === idx;
+              const speed = isFollowedRoute ? SPEED * 0.05 : SPEED;
               for (let i = 0; i < cfg.numTrucks; i++) {
-                state.progress[i] += SPEED * delta * state.directions[i];
+                state.progress[i] += speed * delta * state.directions[i];
                 if (state.progress[i] >= 1) {
                   state.progress[i] = 1;
                   state.directions[i] = -1;
@@ -216,6 +278,24 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
                 buildTruckCollection(state.coords, state.progress, state.directions),
               );
             });
+
+            // Follow truck camera
+            if (followingRef.current) {
+              const { routeIdx, truckIdx } = followingRef.current;
+              const state = routeState[routeIdx];
+              if (state && truckIdx < state.progress.length && !map.isMoving()) {
+                const { position, bearing } = getPositionAndBearing(state.coords, state.progress[truckIdx]);
+                const truckBearing = state.directions[truckIdx] === 1 ? bearing : bearing + 180;
+                map.easeTo({
+                  center: position,
+                  bearing: truckBearing,
+                  zoom: 18,
+                  pitch: 72,
+                  duration: 100,
+                  easing: (n) => n,
+                });
+              }
+            }
 
             animFrameId = requestAnimationFrame(animate);
           }
@@ -232,6 +312,32 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
         "space-color": "rgb(5, 5, 15)",
         "star-intensity": 0.8,
       });
+
+      // 3D building extrusions
+      const layers = map.getStyle().layers;
+      const labelLayerId = layers?.find(
+        (layer) => layer.type === "symbol" && layer.layout?.["text-field"]
+      )?.id;
+
+      if (!map.getLayer("3d-buildings")) {
+        map.addLayer(
+          {
+            id: "3d-buildings",
+            source: "composite",
+            "source-layer": "building",
+            filter: ["==", "extrude", "true"],
+            type: "fill-extrusion",
+            minzoom: 14,
+            paint: {
+              "fill-extrusion-color": "#1a1a2e",
+              "fill-extrusion-height": ["get", "height"],
+              "fill-extrusion-base": ["get", "min_height"],
+              "fill-extrusion-opacity": 0.7,
+            },
+          },
+          labelLayerId,
+        );
+      }
     });
 
     map.on("mousedown", () => {

@@ -120,7 +120,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
-  const { focusRoute } = useMapActions();
+  const { focusRoute, followTruck } = useMapActions();
   const router = useRouter();
   const [routesOpen, setRoutesOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
@@ -141,7 +141,7 @@ function AppLayout() {
         {isMap && selectedRoute && (
           <div className="absolute top-6 left-6 z-50 flex flex-col gap-3 w-72 animate-in slide-in-from-left-4 fade-in duration-300">
             <RouteInfoOverlay routeId={selectedRoute} onClose={() => setSelectedRoute(null)} onRouteChange={handleRouteClick} />
-            <TrucksOverlay routeId={selectedRoute} />
+            <TrucksOverlay routeId={selectedRoute} onTruckClick={(routeId, truckIdx) => followTruck?.(routeId, truckIdx)} />
           </div>
         )}
         {isMap && <EnergyOverlay visible={!!selectedRoute} />}

@@ -203,7 +203,7 @@ export function EnergyOverlay({ visible }: { visible: boolean }) {
   );
 }
 
-export function TrucksOverlay({ routeId }: { routeId: string | null }) {
+export function TrucksOverlay({ routeId, onTruckClick }: { routeId: string | null; onTruckClick?: (routeId: string, truckIdx: number) => void }) {
   if (!routeId) return null;
 
   const trucks = TRUCK_DATA[routeId];
@@ -218,10 +218,11 @@ export function TrucksOverlay({ routeId }: { routeId: string | null }) {
           </p>
         </div>
         <div className="px-4 pb-4 space-y-2 max-h-52 overflow-y-auto">
-          {trucks.map((truck) => (
+          {trucks.map((truck, idx) => (
             <div
               key={truck.id}
-              className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2"
+              onClick={() => onTruckClick?.(routeId, idx)}
+              className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 cursor-pointer hover:bg-white/10 transition-colors"
             >
               <div className="flex items-center gap-2">
                 <Truck className="h-3.5 w-3.5 text-gray-400" />
