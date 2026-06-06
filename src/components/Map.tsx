@@ -1,13 +1,33 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useImperativeHandle, useRef, forwardRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoibWFwYm94OTYzMCIsImEiOiJjbWh4Y2lpOXAwMHZiMmxzOWVtaW1weTZvIn0.1lj2lcLygace2d9gcLnVMA";
 
-export default function Map() {
+const HK_CENTER: [number, number] = [114.1694, 22.3193];
+
+export interface MapHandle {
+  flyToHongKong: () => void;
+}
+
+const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    flyToHongKong: () => {
+      if (!mapRef.current) return;
+      mapRef.current.flyTo({
+        center: HK_CENTER,
+        zoom: 11,
+        pitch: 45,
+        bearing: 0,
+        duration: 3000,
+        essential: true,
+      });
+    },
+  }));
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -118,4 +138,8 @@ export default function Map() {
       }}
     />
   );
-}
+});
+
+Map.displayName = "Map";
+
+export default Map;

@@ -9,15 +9,16 @@ import { Dock, DockIcon } from "@/components/ui/dock";
 interface MapDockProps {
   isDark?: boolean;
   toggle?: () => void;
+  onOverviewClick?: () => void;
 }
 
-const navItems = [
-  { icon: HomeIcon, label: "Overview" },
-  { icon: ClockIcon, label: "Timeplan" },
-  { icon: FileTextIcon, label: "Document" },
-];
+export function MapDock({ isDark, toggle, onOverviewClick }: MapDockProps) {
+  const navItems = [
+    { icon: HomeIcon, label: "Overview", onClick: onOverviewClick },
+    { icon: ClockIcon, label: "Timeplan", onClick: undefined },
+    { icon: FileTextIcon, label: "Document", onClick: undefined },
+  ];
 
-export function MapDock({ isDark, toggle }: MapDockProps) {
   return (
     <TooltipProvider>
       <Dock direction="middle">
@@ -26,6 +27,7 @@ export function MapDock({ isDark, toggle }: MapDockProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
+                  onClick={item.onClick}
                   aria-label={item.label}
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),

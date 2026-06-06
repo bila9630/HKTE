@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { DarkModeProvider, useDarkModeContext } from "@/context/DarkModeContext";
+import { MapActionsProvider, useMapActions } from "@/context/MapActionsContext";
 import { MapDock } from "@/components/MapDock";
 
 import appCss from "../styles.css?url";
@@ -117,11 +118,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
+  const { onOverviewClick } = useMapActions();
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <Outlet />
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <MapDock isDark={isDark} toggle={toggle} />
+        <MapDock isDark={isDark} toggle={toggle} onOverviewClick={onOverviewClick} />
       </div>
     </div>
   );
@@ -133,7 +135,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <DarkModeProvider>
-        <AppLayout />
+        <MapActionsProvider>
+          <AppLayout />
+        </MapActionsProvider>
       </DarkModeProvider>
     </QueryClientProvider>
   );

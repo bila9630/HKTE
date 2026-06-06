@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Map from "../components/Map";
+import { useEffect, useRef } from "react";
+import Map, { MapHandle } from "../components/Map";
+import { useMapActions } from "../context/MapActionsContext";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -14,5 +16,13 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return <Map />;
+  const mapRef = useRef<MapHandle>(null);
+  const { setOverviewClick } = useMapActions();
+
+  useEffect(() => {
+    setOverviewClick(() => mapRef.current?.flyToHongKong());
+    return () => setOverviewClick(undefined);
+  }, [setOverviewClick]);
+
+  return <Map ref={mapRef} />;
 }
