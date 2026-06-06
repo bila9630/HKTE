@@ -2,9 +2,9 @@ import { useEffect, useRef, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-// Replace with your Mapbox access token.
-// Get one for free at https://account.mapbox.com/access-tokens/
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || "";
+// Mapbox access token — publishable key, safe for client-side use
+const MAPBOX_TOKEN =
+  "pk.eyJ1IjoibWFwYm94OTYzMCIsImEiOiJjbWh4Y2lpOXAwMHZiMmxzOWVtaW1weTZvIn0.1lj2lcLygace2d9gcLnVMA";
 
 export default function Globe() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -64,7 +64,11 @@ export default function Globe() {
   }, [startRotation]);
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
+    console.log("[Globe] useEffect running");
+    if (!mapContainerRef.current || mapRef.current) {
+      console.log("[Globe] early return", { container: !!mapContainerRef.current, mapExists: !!mapRef.current });
+      return;
+    }
 
     if (!MAPBOX_TOKEN) {
       console.warn(
@@ -73,48 +77,61 @@ export default function Globe() {
       return;
     }
 
+    console.log("[Globe] Initializing map with token");
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/dark-v11",
-      center: [0, 20],
-      zoom: 1.5,
-      projection: { name: "globe" },
-      attributionControl: false,
-      renderWorldCopies: false,
-    });
-
-    mapRef.current = map;
-
-    map.on("style.load", () => {
-      // Set atmosphere for space-like feel
-      map.setFog({
-        color: "rgb(10, 10, 30)",
-        "high-color": "rgb(20, 20, 60)",
-        "horizon-blend": 0.5,
-        "space-color": "rgb(5, 5, 15)",
-        "star-intensity": 0.8,
+    try {
+      const map = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: "mapbox://styles/mapbox/dark-v11",
+        center: [0, 20],
+        zoom: 1.5,
+        projection: { name: "globe" },
+        attributionControl: false,
+        renderWorldCopies: false,
       });
 
-      startRotation();
-    });
+      console.log("[Globe] Map instance created");
+      mapRef.current = map;
 
-    // Pause rotation on user interaction
-    map.on("mousedown", handleInteractionStart);
-    map.on("touchstart", handleInteractionStart);
-    map.on("dragstart", handleInteractionStart);
+      map.on("style.load", () => {
+        console.log("[Globe] Style loaded");
+        // Set atmosphere for space-like feel
+        map.setFog({
+          color: "rgb(10, 10, 30)",
+          "high-color": "rgb(20, 20, 60)",
+          "horizon-blend": 0.5,
+          "space-color": "rgb(5, 5, 15)",
+          "star-intensity": 0.8,
+        });
 
-    // Resume rotation after interaction ends
-    map.on("mouseup", handleInteractionEnd);
-    map.on("touchend", handleInteractionEnd);
-    map.on("dragend", handleInteractionEnd);
+        startRotation();
+      });
+
+      map.on("error", (e) => {
+        console.error("[Globe] Mapbox error:", e);
+      });
+
+      // Pause rotation on user interaction
+      map.on("mousedown", handleInteractionStart);
+      map.on("touchstart", handleInteractionStart);
+      map.on("dragstart", handleInteractionStart);
+
+      // Resume rotation after interaction ends
+      map.on("mouseup", handleInteractionEnd);
+      map.on("touchend", handleInteractionEnd);
+      map.on("dragend", handleInteractionEnd);
+    } catch (err) {
+      console.error("[Globe] Failed to create map:", err);
+    }
 
     return () => {
       if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
       stopRotation();
-      map.remove();
-      mapRef.current = null;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
     };
   }, [handleInteractionStart, handleInteractionEnd, startRotation, stopRotation]);
 
