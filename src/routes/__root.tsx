@@ -11,8 +11,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { DarkModeProvider, useDarkModeContext } from "@/context/DarkModeContext";
 import { MapActionsProvider, useMapActions } from "@/context/MapActionsContext";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MapDock } from "@/components/MapDock";
 import { RoutesPanel } from "@/components/RoutesPanel";
-import { RouteInfoOverlay, EnergyOverlay, TrucksOverlay } from "@/components/RouteInfoOverlay";
+import { RouteInfoOverlay, EnergyOverlay, TrucksOverlay, TruckDetailOverlay } from "@/components/RouteInfoOverlay";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -120,10 +121,11 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
-  const { focusRoute, followTruck } = useMapActions();
+  const { focusRoute, followTruck, setOnMapTruckClick, onOverviewClick } = useMapActions();
   const router = useRouter();
   const [routesOpen, setRoutesOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
+  const [selectedTruck, setSelectedTruck] = useState<number | null>(null);
 
   const pathname = router.state.location.pathname;
   const isMap = pathname === "/";
@@ -131,20 +133,51 @@ function AppLayout() {
   const handleRouteClick = (routeId: string) => {
     focusRoute?.(routeId);
     setSelectedRoute(routeId);
+    setSelectedTruck(null);
   };
+
+  const handleTruckClick = (routeId: string, truckIdx: number) => {
+    followTruck?.(routeId, truckIdx);
+    setSelectedRoute(routeId);
+    setSelectedTruck(truckIdx);
+  };
+
+  const handleCloseTruckDetail = () => {
+    const routeId = selectedRoute;
+    setSelectedTruck(null);
+    if (routeId) {
+      setTimeout(() => focusRoute?.(routeId), 50);
+    }
+  };
+
+  useEffect(() => {
+    setOnMapTruckClick((routeId: string, truckIdx: number) => {
+      setSelectedRoute(routeId);
+      setSelectedTruck(truckIdx);
+    });
+    return () => setOnMapTruckClick(undefined);
+  }, [setOnMapTruckClick]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
-      <AppSidebar isDark={isDark} toggle={toggle} onRoutesClick={() => setRoutesOpen(true)} />
+      {!isMap && <AppSidebar isDark={isDark} toggle={toggle} onRoutesClick={() => setRoutesOpen(true)} />}
       <div className="relative flex-1 overflow-hidden">
         <Outlet />
         {isMap && selectedRoute && (
           <div className="absolute top-6 left-6 z-50 flex flex-col gap-3 w-72 animate-in slide-in-from-left-4 fade-in duration-300">
-            <RouteInfoOverlay routeId={selectedRoute} onClose={() => setSelectedRoute(null)} onRouteChange={handleRouteClick} />
-            <TrucksOverlay routeId={selectedRoute} onTruckClick={(routeId, truckIdx) => followTruck?.(routeId, truckIdx)} />
+            <RouteInfoOverlay routeId={selectedRoute} onClose={() => { setSelectedRoute(null); setSelectedTruck(null); onOverviewClick?.(); }} onRouteChange={handleRouteClick} />
+            <TrucksOverlay routeId={selectedRoute} onTruckClick={handleTruckClick} selectedTruckIdx={selectedTruck} />
           </div>
         )}
-        {isMap && <EnergyOverlay visible={!!selectedRoute} />}
+        {isMap && selectedRoute && selectedTruck !== null && (
+          <TruckDetailOverlay routeId={selectedRoute} truckIdx={selectedTruck} onClose={handleCloseTruckDetail} />
+        )}
+        {isMap && selectedRoute && selectedTruck === null && <EnergyOverlay visible={true} />}
+        {isMap && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50">
+            <MapDock isDark={isDark} toggle={toggle} onOverviewClick={() => router.navigate({ to: '/dashboard' })} onRoutesClick={() => setRoutesOpen(true)} />
+          </div>
+        )}
       </div>
       <RoutesPanel open={routesOpen} onOpenChange={setRoutesOpen} onRouteClick={handleRouteClick} />
     </div>
