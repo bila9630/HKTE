@@ -22,7 +22,7 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
       if (!mapRef.current) return;
       mapRef.current.flyTo({
         center: HK_CENTER,
-        zoom: 10,
+        zoom: 11,
         pitch: 0,
         bearing: 0,
         duration: 3000,
@@ -110,8 +110,8 @@ const Map = forwardRef<MapHandle, object>(function Map(_, ref) {
         userInteracting = true;
         map.flyTo({
           center: HK_CENTER,
-          zoom: 9.5,
-          pitch: 45,
+          zoom: 11,
+          pitch: 0,
           bearing: 0,
           duration: 3000,
           essential: true,
