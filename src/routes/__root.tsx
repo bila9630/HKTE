@@ -120,7 +120,8 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
-  const { onOverviewClick, focusRoute } = useMapActions();
+  const { focusRoute } = useMapActions();
+  const router = useRouter();
   const [routesOpen, setRoutesOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
 
@@ -135,7 +136,7 @@ function AppLayout() {
       <RouteInfoOverlay routeId={selectedRoute} onClose={() => setSelectedRoute(null)} onRouteChange={handleRouteClick} />
       <EnergyOverlay visible={!!selectedRoute} />
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <MapDock isDark={isDark} toggle={toggle} onOverviewClick={onOverviewClick} onRoutesClick={() => setRoutesOpen(true)} />
+        <MapDock isDark={isDark} toggle={toggle} onOverviewClick={() => router.navigate({ to: '/dashboard' })} onRoutesClick={() => setRoutesOpen(true)} />
       </div>
       <RoutesPanel open={routesOpen} onOpenChange={setRoutesOpen} onRouteClick={handleRouteClick} />
     </div>
