@@ -8,6 +8,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { DarkModeProvider, useDarkModeContext } from "@/context/DarkModeContext";
+import { MapDock } from "@/components/MapDock";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -113,13 +115,26 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function AppLayout() {
+  const { isDark, toggle } = useDarkModeContext();
+  return (
+    <div className="relative h-screen w-full overflow-hidden">
+      <Outlet />
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+        <MapDock isDark={isDark} toggle={toggle} />
+      </div>
+    </div>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <DarkModeProvider>
+        <AppLayout />
+      </DarkModeProvider>
     </QueryClientProvider>
   );
 }
