@@ -237,38 +237,6 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
                   geometry: { type: "LineString", coordinates: coords },
                   properties: {},
                 });
-
-                // Add waypoint dots: start, end, and up to 4 intermediate
-                const totalPts = coords.length;
-                const waypointIndices = [0];
-                const numMid = Math.min(4, totalPts - 2);
-                for (let i = 1; i <= numMid; i++) {
-                  waypointIndices.push(Math.round((i / (numMid + 1)) * (totalPts - 1)));
-                }
-                waypointIndices.push(totalPts - 1);
-
-                const waypointFeatures = waypointIndices.map((i) => ({
-                  type: "Feature" as const,
-                  geometry: { type: "Point" as const, coordinates: coords[i] },
-                  properties: { isEndpoint: i === 0 || i === totalPts - 1 },
-                }));
-
-                map.addSource(`waypoints-${cfg.id}`, {
-                  type: "geojson",
-                  data: { type: "FeatureCollection", features: waypointFeatures },
-                });
-                map.addLayer({
-                  id: `waypoints-layer-${cfg.id}`,
-                  type: "circle",
-                  source: `waypoints-${cfg.id}`,
-                  paint: {
-                    "circle-radius": ["case", ["get", "isEndpoint"], 6, 4],
-                    "circle-color": cfg.lineColor,
-                    "circle-stroke-width": 2,
-                    "circle-stroke-color": "#ffffff",
-                    "circle-opacity": 0.9,
-                  },
-                });
               })
               .catch((err) => console.error(`[Map] Directions fetch failed for ${cfg.id}:`, err));
           });
