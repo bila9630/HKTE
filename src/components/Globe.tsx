@@ -111,25 +111,27 @@ export default function Globe() {
       map.on("error", (e) => {
         console.error("[Globe] Mapbox error:", e);
       });
+
+      // Pause rotation on user interaction
+      map.on("mousedown", handleInteractionStart);
+      map.on("touchstart", handleInteractionStart);
+      map.on("dragstart", handleInteractionStart);
+
+      // Resume rotation after interaction ends
+      map.on("mouseup", handleInteractionEnd);
+      map.on("touchend", handleInteractionEnd);
+      map.on("dragend", handleInteractionEnd);
     } catch (err) {
       console.error("[Globe] Failed to create map:", err);
     }
 
-    // Pause rotation on user interaction
-    map.on("mousedown", handleInteractionStart);
-    map.on("touchstart", handleInteractionStart);
-    map.on("dragstart", handleInteractionStart);
-
-    // Resume rotation after interaction ends
-    map.on("mouseup", handleInteractionEnd);
-    map.on("touchend", handleInteractionEnd);
-    map.on("dragend", handleInteractionEnd);
-
     return () => {
       if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
       stopRotation();
-      map.remove();
-      mapRef.current = null;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
     };
   }, [handleInteractionStart, handleInteractionEnd, startRotation, stopRotation]);
 
