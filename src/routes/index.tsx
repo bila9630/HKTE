@@ -1,19 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Globe from "../components/Globe";
+import Map from "../components/Map";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Globe" },
-      { name: "description", content: "An immersive 3D globe experience." },
-      { property: "og:title", content: "Globe" },
-      { property: "og:description", content: "An immersive 3D globe experience." },
+      { title: "Map" },
+      { name: "description", content: "An immersive 3D map experience." },
+      { property: "og:title", content: "Map" },
+      { property: "og:description", content: "An immersive 3D map experience." },
     ],
   }),
   component: Index,
 });
 
 function Index() {
-  return <Globe />;
+  return <Map />;
 }
-
