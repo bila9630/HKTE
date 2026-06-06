@@ -1,4 +1,4 @@
-import { X, Truck, Battery, Gauge, Activity, DollarSign } from "lucide-react";
+import { X, Truck, Battery, Gauge, Activity } from "lucide-react";
 import { TRUCK_DATA, ROUTE_NAMES } from "@/lib/routeConstants";
 
 interface TruckDetailOverlayProps {
@@ -103,17 +103,6 @@ export function TruckDetailOverlay({ routeId, truckIdx, onClose }: TruckDetailOv
               </span>
             </div>
             <span className="text-[11px] text-white/70 font-medium">{truck.speed} km/h</span>
-          </div>
-
-          {/* Expected Earning */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <DollarSign size={12} className="text-white/40" />
-              <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
-                Expected Earning
-              </span>
-            </div>
-            <span className="text-[11px] text-white/70 font-medium">HK$90</span>
           </div>
         </div>
       </div>

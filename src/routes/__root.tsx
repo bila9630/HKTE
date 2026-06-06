@@ -15,6 +15,7 @@ import { MapDock } from "@/components/MapDock";
 import { RoutesPanel } from "@/components/RoutesPanel";
 import { RouteInfoOverlay, TrucksOverlay } from "@/components/RouteInfoOverlay";
 import { TruckDetailOverlay } from "@/components/TruckDetailOverlay";
+import { RouteInfoCard } from "@/components/RouteInfoCard";
 import { SwitchTruck } from "@/components/SwitchTruck";
 import { TruckDetailRouteCard } from "@/components/TruckDetailRouteCard";
 
@@ -175,6 +176,7 @@ function AppLayout() {
         {isMap && selectedRoute && selectedTruck !== null && (
           <>
             <SwitchTruck routeId={selectedRoute} truckIdx={selectedTruck} onSwitch={(idx) => handleTruckClick(selectedRoute, idx)} />
+            <RouteInfoCard routeId={selectedRoute} />
             <TruckDetailOverlay routeId={selectedRoute} truckIdx={selectedTruck} onClose={handleCloseTruckDetail} />
             <TruckDetailRouteCard routeId={selectedRoute} />
           </>
