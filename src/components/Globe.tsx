@@ -64,7 +64,11 @@ export default function Globe() {
   }, [startRotation]);
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
+    console.log("[Globe] useEffect running");
+    if (!mapContainerRef.current || mapRef.current) {
+      console.log("[Globe] early return", { container: !!mapContainerRef.current, mapExists: !!mapRef.current });
+      return;
+    }
 
     if (!MAPBOX_TOKEN) {
       console.warn(
@@ -73,32 +77,43 @@ export default function Globe() {
       return;
     }
 
+    console.log("[Globe] Initializing map with token");
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/dark-v11",
-      center: [0, 20],
-      zoom: 1.5,
-      projection: { name: "globe" },
-      attributionControl: false,
-      renderWorldCopies: false,
-    });
-
-    mapRef.current = map;
-
-    map.on("style.load", () => {
-      // Set atmosphere for space-like feel
-      map.setFog({
-        color: "rgb(10, 10, 30)",
-        "high-color": "rgb(20, 20, 60)",
-        "horizon-blend": 0.5,
-        "space-color": "rgb(5, 5, 15)",
-        "star-intensity": 0.8,
+    try {
+      const map = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: "mapbox://styles/mapbox/dark-v11",
+        center: [0, 20],
+        zoom: 1.5,
+        projection: { name: "globe" },
+        attributionControl: false,
+        renderWorldCopies: false,
       });
 
-      startRotation();
-    });
+      console.log("[Globe] Map instance created");
+      mapRef.current = map;
+
+      map.on("style.load", () => {
+        console.log("[Globe] Style loaded");
+        // Set atmosphere for space-like feel
+        map.setFog({
+          color: "rgb(10, 10, 30)",
+          "high-color": "rgb(20, 20, 60)",
+          "horizon-blend": 0.5,
+          "space-color": "rgb(5, 5, 15)",
+          "star-intensity": 0.8,
+        });
+
+        startRotation();
+      });
+
+      map.on("error", (e) => {
+        console.error("[Globe] Mapbox error:", e);
+      });
+    } catch (err) {
+      console.error("[Globe] Failed to create map:", err);
+    }
 
     // Pause rotation on user interaction
     map.on("mousedown", handleInteractionStart);
