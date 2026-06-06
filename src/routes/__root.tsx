@@ -10,9 +10,9 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 import { DarkModeProvider, useDarkModeContext } from "@/context/DarkModeContext";
 import { MapActionsProvider, useMapActions } from "@/context/MapActionsContext";
-import { MapDock } from "@/components/MapDock";
+import { AppSidebar } from "@/components/AppSidebar";
 import { RoutesPanel } from "@/components/RoutesPanel";
-import { RouteInfoOverlay } from "@/components/RouteInfoOverlay";
+import { RouteInfoOverlay, EnergyOverlay, TrucksOverlay } from "@/components/RouteInfoOverlay";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -120,9 +120,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
-  const { onOverviewClick, focusRoute } = useMapActions();
+  const { focusRoute } = useMapActions();
+  const router = useRouter();
   const [routesOpen, setRoutesOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
+
+  const pathname = router.state.location.pathname;
+  const isMap = pathname === "/";
 
   const handleRouteClick = (routeId: string) => {
     focusRoute?.(routeId);
@@ -130,11 +134,17 @@ function AppLayout() {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
-      <Outlet />
-      <RouteInfoOverlay routeId={selectedRoute} onClose={() => setSelectedRoute(null)} />
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <MapDock isDark={isDark} toggle={toggle} onOverviewClick={onOverviewClick} onRoutesClick={() => setRoutesOpen(true)} />
+    <div className="flex h-screen w-full overflow-hidden">
+      <AppSidebar isDark={isDark} toggle={toggle} onRoutesClick={() => setRoutesOpen(true)} />
+      <div className="relative flex-1 overflow-hidden">
+        <Outlet />
+        {isMap && selectedRoute && (
+          <div className="absolute top-6 left-6 z-50 flex flex-col gap-3 w-72 animate-in slide-in-from-left-4 fade-in duration-300">
+            <RouteInfoOverlay routeId={selectedRoute} onClose={() => setSelectedRoute(null)} onRouteChange={handleRouteClick} />
+            <TrucksOverlay routeId={selectedRoute} />
+          </div>
+        )}
+        {isMap && <EnergyOverlay visible={!!selectedRoute} />}
       </div>
       <RoutesPanel open={routesOpen} onOpenChange={setRoutesOpen} onRouteClick={handleRouteClick} />
     </div>
