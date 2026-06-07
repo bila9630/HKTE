@@ -129,7 +129,6 @@ function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
   const { onOverviewClick, followTruck, setOnMapTruckClick, setOnOverviewReady } = useMapActions();
   const [cardsVisible, setCardsVisible] = useState(false);
-  const [routesOpen, setRoutesOpen] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
   const [selectedTruck, setSelectedTruck] = useState<number | null>(null);
@@ -143,6 +142,8 @@ function AppLayout() {
   const handleCloseTruckDetail = () => {
     setSelectedTruck(null);
     setSelectedRoute(null);
+    setCardsVisible(false);
+    onOverviewClick?.();
   };
 
   useEffect(() => {
@@ -187,7 +188,7 @@ function AppLayout() {
           <MapDock
             isDark={isDark}
             toggle={toggle}
-            onHomeClick={() => { setCardsVisible(false); onOverviewClick?.(); }}
+            onHomeClick={() => { setCardsVisible(false); setPlannerOpen(false); onOverviewClick?.(); }}
             onPlanClick={() => setPlannerOpen((v) => !v)}
           />
         </div>
