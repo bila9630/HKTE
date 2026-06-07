@@ -32,7 +32,7 @@ const unreadCount = ACTIVITIES.filter((a) => a.unread).length;
 
 export function FleetActivityCard() {
   return (
-    <div className="absolute bottom-6 right-6 z-50 w-72 animate-in fade-in slide-in-from-right-4 duration-300">
+    <div className="absolute bottom-6 right-6 z-50 w-80 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="rounded-2xl border border-white/10 bg-gray-950/80 backdrop-blur-xl overflow-hidden">
 
         {/* Header */}
