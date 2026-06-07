@@ -1,22 +1,23 @@
-# GridFlow - Bringing extra Energy from electric trucks into HongKong
-> **Transforming Cross-Border Logistics Fleets into a Decentralized Energy Network.** Built for the Hackathon.
+# GridFlow
+> **HKTE x EuroTech Hackathon**
 
-An immersive 3D spatial visualization and route optimization dashboard tracking electric heavy-duty truck fleets traveling between Mainland China and Hong Kong. **GridFlow** showcases how cross-boundary logistics vehicles can utilize their scheduled downtime and massive battery reserves to balance urban energy grids through Vehicle-to-Building (V2B) and Vehicle-to-Grid (V2G) systems.
+GridFlow is an application that enables Vehicle-to-Building (V2B) and Vehicle-to-Grid (V2G) systems.
 
----
+### V2G Concept
+Energy prices are constantly fluctuating, influenced by factors such as weather conditions and electricity demand. When renewable energy sources like solar and wind generate abundant power, electricity prices tend to fall. However, prices can rise significantly during periods of low renewable generation or when demand peaks, such as when large numbers of people charge their devices or electric vehicles.
 
-## 💡 The Core Concept: Mobile Energy Storage
+This is where Vehicle-to-Grid (V2G) technology becomes valuable. V2G enables electric vehicles not only to consume electricity from the grid but also to return stored energy when demand and prices are high. In essence, EVs can act as mobile energy storage units, helping to balance the grid while allowing owners to reduce energy costs or even generate additional income.
 
-As freight fleets transition to heavy-duty electric trucks, they present a massive unexploited clean energy opportunity. A typical cross-border electric vehicle possesses a large battery capacity but only consumes a fraction of it on its standard physical route. 
+### Hong Kong
+The shift toward electric freight transportation presents a unique opportunity to unlock large-scale distributed energy storage. Cross-border electric trucks are equipped with high-capacity batteries, yet much of this stored energy remains unused throughout their daily operations.
 
-GridFlow visualizes and optimizes how logistics providers can turn this massive, mobile battery surplus into a dual-revenue stream by capturing regional utility pricing structures:
+GridFlow helps logistics providers transform this surplus energy into a new revenue stream by optimizing when and where vehicles charge and discharge energy:
 
-*   **Strategic Fleet Charging:** Trucks charge utilizing clean, affordable solar energy during the driver's mandatory rest windows at logistics parks in Guangdong.
-*   **Intelligent Demand Shaving:** Upon arrival in Hong Kong, our platform routes vehicles to dock at private warehouse microgrids during localized peak demand periods.
-*   **Grid Peak Mitigation:** The trucks discharge their clean surplus energy directly into the facility's power network, drastically lowering the warehouse's reliance on expensive peak-hour grid electricity and shaving down high commercial peak demand charge penalties.
+- **Strategic Charging:** Trucks charge using low-cost renewable energy during mandatory driver rest periods in Guangdong.
+- **Smart Energy Deployment:** Upon arriving in Hong Kong, vehicles are directed to facilities where energy demand and electricity prices are highest.
+- **Peak Demand Reduction:** Stored energy is discharged into warehouse microgrids, reducing peak electricity costs and demand charges.
 
-> **The Operational Benefit:** By aligning charging schedules with driver rest compliance laws and discharging during peak commercial utility hours, fleet operators can generate massive secondary operational savings and bonus revenue without altering a single delivery deadline or adding new physical assets.
-
+> **The Operational Benefit:** Fleet operators generate additional revenue and reduce energy costs without changing delivery schedules or investing in new infrastructure.
 ---
 
 ## 🚀 Optimization Features
