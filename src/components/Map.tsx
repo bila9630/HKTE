@@ -19,16 +19,19 @@ export interface MapHandle {
 
 interface MapProps {
   onTruckClick?: (routeId: string, truckIdx: number) => void;
+  onOverviewReady?: () => void;
 }
 
-const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) {
+const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick, onOverviewReady }, ref) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const followingRef = useRef<{ routeIdx: number; truckIdx: number } | null>(null);
   const routeStateRef = useRef<{ coords: [number, number][]; progress: number[]; directions: (1 | -1)[] }[]>([]);
   const onTruckClickRef = useRef(onTruckClick);
+  const onOverviewReadyRef = useRef(onOverviewReady);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   onTruckClickRef.current = onTruckClick;
+  onOverviewReadyRef.current = onOverviewReady;
 
   useImperativeHandle(ref, () => ({
     flyToHongKong: () => {
@@ -68,6 +71,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
         duration: 3000,
         essential: true,
       });
+      map.once("moveend", () => onOverviewReadyRef.current?.());
     },
     followTruck: (routeId: string, truckIdx: number) => {
       const map = mapRef.current;
@@ -358,6 +362,14 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
           duration: 3000,
           essential: true,
         });
+        map.once("moveend", () => {
+          ROUTE_CONFIGS.forEach((cfg) => {
+            if (map.getLayer(`trucks-layer-${cfg.id}`)) {
+              map.setLayoutProperty(`trucks-layer-${cfg.id}`, "visibility", "visible");
+            }
+          });
+          onOverviewReadyRef.current?.();
+        });
       }, 500);
 
       const truckImageTasks = ROUTE_CONFIGS.flatMap((cfg) =>
@@ -417,6 +429,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
               type: "symbol",
               source: `trucks-${cfg.id}`,
               layout: {
+                visibility: "none",
                 "icon-image": ["get", "iconImage"],
                 "icon-size": 1,
                 "icon-allow-overlap": true,

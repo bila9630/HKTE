@@ -9,12 +9,13 @@ import { Dock, DockIcon } from "@/components/ui/dock";
 interface MapDockProps {
   isDark?: boolean;
   toggle?: () => void;
+  onHomeClick?: () => void;
   onPlanClick?: () => void;
 }
 
-export function MapDock({ isDark, toggle, onPlanClick }: MapDockProps) {
+export function MapDock({ isDark, toggle, onHomeClick, onPlanClick }: MapDockProps) {
   const navItems = [
-    { icon: HomeIcon, label: "Overview", onClick: undefined },
+    { icon: HomeIcon, label: "Overview", onClick: onHomeClick },
     { icon: FileTextIcon, label: "Plan Trip", onClick: onPlanClick },
   ];
 

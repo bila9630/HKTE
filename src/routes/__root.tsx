@@ -127,7 +127,8 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
-  const { followTruck, setOnMapTruckClick } = useMapActions();
+  const { onOverviewClick, followTruck, setOnMapTruckClick, setOnOverviewReady } = useMapActions();
+  const [cardsVisible, setCardsVisible] = useState(false);
   const [routesOpen, setRoutesOpen] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
@@ -145,6 +146,11 @@ function AppLayout() {
   };
 
   useEffect(() => {
+    setOnOverviewReady(() => setCardsVisible(true));
+    return () => setOnOverviewReady(undefined);
+  }, [setOnOverviewReady]);
+
+  useEffect(() => {
     setOnMapTruckClick((routeId: string, truckIdx: number) => {
       setSelectedRoute(routeId);
       setSelectedTruck(truckIdx);
@@ -156,9 +162,9 @@ function AppLayout() {
     <div className="flex h-screen w-full overflow-hidden">
       <div className="relative flex-1 overflow-hidden">
         <Outlet />
-        {!selectedRoute && !plannerOpen && <FleetOverviewCard onTruckClick={handleTruckClick} />}
-        {!selectedRoute && !plannerOpen && <RevenueCard />}
-        {!selectedRoute && !plannerOpen && <FleetActivityCard />}
+        {cardsVisible && !selectedRoute && !plannerOpen && <FleetOverviewCard onTruckClick={handleTruckClick} />}
+        {cardsVisible && !selectedRoute && !plannerOpen && <RevenueCard />}
+        {cardsVisible && !selectedRoute && !plannerOpen && <FleetActivityCard />}
         {selectedRoute && selectedTruck === null && (
           <div className="absolute bottom-6 left-6 z-50 w-80 animate-in slide-in-from-left-4 fade-in duration-300">
             <TrucksOverlay
@@ -181,7 +187,8 @@ function AppLayout() {
           <MapDock
             isDark={isDark}
             toggle={toggle}
-onPlanClick={() => setPlannerOpen((v) => !v)}
+            onHomeClick={() => { setCardsVisible(false); onOverviewClick?.(); }}
+            onPlanClick={() => setPlannerOpen((v) => !v)}
           />
         </div>
       </div>

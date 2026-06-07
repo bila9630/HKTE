@@ -3,6 +3,8 @@ import { createContext, useCallback, useContext, useState, type ReactNode } from
 interface MapActionsContextType {
   onOverviewClick?: () => void;
   setOverviewClick: (fn: (() => void) | undefined) => void;
+  onOverviewReady?: () => void;
+  setOnOverviewReady: (fn: (() => void) | undefined) => void;
   followTruck?: (routeId: string, truckIdx: number) => void;
   setFollowTruck: (fn: ((routeId: string, truckIdx: number) => void) | undefined) => void;
   onMapTruckClick?: (routeId: string, truckIdx: number) => void;
@@ -17,6 +19,7 @@ interface MapActionsContextType {
 
 const MapActionsContext = createContext<MapActionsContextType>({
   setOverviewClick: () => {},
+  setOnOverviewReady: () => {},
   setFollowTruck: () => {},
   setOnMapTruckClick: () => {},
   setFlyToLocation: () => {},
@@ -26,6 +29,7 @@ const MapActionsContext = createContext<MapActionsContextType>({
 
 export function MapActionsProvider({ children }: { children: ReactNode }) {
   const [onOverviewClick, setOnOverviewClick] = useState<(() => void) | undefined>(undefined);
+  const [onOverviewReady, setOnOverviewReadyState] = useState<(() => void) | undefined>(undefined);
   const [followTruck, setFollowTruckState] = useState<((routeId: string, truckIdx: number) => void) | undefined>(undefined);
   const [onMapTruckClick, setOnMapTruckClickState] = useState<((routeId: string, truckIdx: number) => void) | undefined>(undefined);
   const [flyToLocation, setFlyToLocationState] = useState<((lng: number, lat: number) => void) | undefined>(undefined);
@@ -34,6 +38,10 @@ export function MapActionsProvider({ children }: { children: ReactNode }) {
 
   const setOverviewClick = useCallback((fn: (() => void) | undefined) => {
     setOnOverviewClick(() => fn);
+  }, []);
+
+  const setOnOverviewReady = useCallback((fn: (() => void) | undefined) => {
+    setOnOverviewReadyState(() => fn);
   }, []);
 
   const setFollowTruck = useCallback((fn: ((routeId: string, truckIdx: number) => void) | undefined) => {
@@ -57,7 +65,7 @@ export function MapActionsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <MapActionsContext.Provider value={{ onOverviewClick, setOverviewClick, followTruck, setFollowTruck, onMapTruckClick, setOnMapTruckClick, flyToLocation, setFlyToLocation, showPlannedRoute, setShowPlannedRoute, clearPlannedRoute, setClearPlannedRoute }}>
+    <MapActionsContext.Provider value={{ onOverviewClick, setOverviewClick, onOverviewReady, setOnOverviewReady, followTruck, setFollowTruck, onMapTruckClick, setOnMapTruckClick, flyToLocation, setFlyToLocation, showPlannedRoute, setShowPlannedRoute, clearPlannedRoute, setClearPlannedRoute }}>
       {children}
     </MapActionsContext.Provider>
   );
