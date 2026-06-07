@@ -10,7 +10,6 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 import { DarkModeProvider, useDarkModeContext } from "@/context/DarkModeContext";
 import { MapActionsProvider, useMapActions } from "@/context/MapActionsContext";
-import { AppSidebar } from "@/components/AppSidebar";
 import { MapDock } from "@/components/MapDock";
 import { TrucksOverlay } from "@/components/RouteInfoOverlay";
 import { TruckDetailOverlay } from "@/components/TruckDetailOverlay";
@@ -126,15 +125,11 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
-  const { followTruck, setOnMapTruckClick, onOverviewClick } = useMapActions();
-  const router = useRouter();
+  const { followTruck, setOnMapTruckClick } = useMapActions();
   const [routesOpen, setRoutesOpen] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
   const [selectedTruck, setSelectedTruck] = useState<number | null>(null);
-
-  const pathname = router.state.location.pathname;
-  const isMap = pathname === "/";
 
   const handleTruckClick = (routeId: string, truckIdx: number) => {
     followTruck?.(routeId, truckIdx);
@@ -145,7 +140,6 @@ function AppLayout() {
   const handleCloseTruckDetail = () => {
     setSelectedTruck(null);
     setSelectedRoute(null);
-    onOverviewClick?.();
   };
 
   useEffect(() => {
@@ -158,13 +152,10 @@ function AppLayout() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
-      {!isMap && <AppSidebar isDark={isDark} toggle={toggle} />}
       <div className="relative flex-1 overflow-hidden">
         <Outlet />
-        {isMap && !selectedRoute && !plannerOpen && (
-          <EnergyChartOverlay />
-        )}
-        {isMap && selectedRoute && selectedTruck === null && (
+        {!selectedRoute && !plannerOpen && <EnergyChartOverlay />}
+        {selectedRoute && selectedTruck === null && (
           <div className="absolute bottom-6 left-6 z-50 w-80 animate-in slide-in-from-left-4 fade-in duration-300">
             <TrucksOverlay
               routeId={selectedRoute}
@@ -173,7 +164,7 @@ function AppLayout() {
             />
           </div>
         )}
-        {isMap && selectedRoute && selectedTruck !== null && (
+        {selectedRoute && selectedTruck !== null && (
           <>
             <SwitchTruck routeId={selectedRoute} truckIdx={selectedTruck} onSwitch={handleTruckClick} />
             <RouteInfoCard routeId={selectedRoute} />
@@ -181,14 +172,15 @@ function AppLayout() {
             <TruckDetailRouteCard routeId={selectedRoute} />
           </>
         )}
-        {isMap && plannerOpen && (
-          <RoutePlanerCard onClose={() => setPlannerOpen(false)} />
-        )}
-        {isMap && (
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50">
-            <MapDock isDark={isDark} toggle={toggle} onOverviewClick={() => router.navigate({ to: '/dashboard' })} onRoutesClick={() => setRoutesOpen(true)} onPlanClick={() => setPlannerOpen((v) => !v)} />
-          </div>
-        )}
+        {plannerOpen && <RoutePlanerCard onClose={() => setPlannerOpen(false)} />}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50">
+          <MapDock
+            isDark={isDark}
+            toggle={toggle}
+            onRoutesClick={() => setRoutesOpen(true)}
+            onPlanClick={() => setPlannerOpen((v) => !v)}
+          />
+        </div>
       </div>
     </div>
   );
