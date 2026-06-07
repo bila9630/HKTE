@@ -125,7 +125,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
-  const { followTruck, setOnMapTruckClick } = useMapActions();
+  const { followTruck, setOnMapTruckClick, onOverviewClick } = useMapActions();
   const router = useRouter();
   const [routesOpen, setRoutesOpen] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
@@ -143,6 +143,8 @@ function AppLayout() {
 
   const handleCloseTruckDetail = () => {
     setSelectedTruck(null);
+    setSelectedRoute(null);
+    onOverviewClick?.();
   };
 
   useEffect(() => {
