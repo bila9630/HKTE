@@ -12,8 +12,7 @@ import { DarkModeProvider, useDarkModeContext } from "@/context/DarkModeContext"
 import { MapActionsProvider, useMapActions } from "@/context/MapActionsContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MapDock } from "@/components/MapDock";
-import { RoutesPanel } from "@/components/RoutesPanel";
-import { RouteInfoOverlay, TrucksOverlay } from "@/components/RouteInfoOverlay";
+import { TrucksOverlay } from "@/components/RouteInfoOverlay";
 import { TruckDetailOverlay } from "@/components/TruckDetailOverlay";
 import { RouteInfoCard } from "@/components/RouteInfoCard";
 import { SwitchTruck } from "@/components/SwitchTruck";
@@ -126,7 +125,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppLayout() {
   const { isDark, toggle } = useDarkModeContext();
-  const { focusRoute, followTruck, setOnMapTruckClick, onOverviewClick } = useMapActions();
+  const { followTruck, setOnMapTruckClick } = useMapActions();
   const router = useRouter();
   const [routesOpen, setRoutesOpen] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
@@ -136,26 +135,14 @@ function AppLayout() {
   const pathname = router.state.location.pathname;
   const isMap = pathname === "/";
 
-  const handleRouteClick = (routeId: string) => {
-    focusRoute?.(routeId);
-    setSelectedRoute(routeId);
-    setSelectedTruck(null);
-    setRoutesOpen(true);
-  };
-
   const handleTruckClick = (routeId: string, truckIdx: number) => {
     followTruck?.(routeId, truckIdx);
     setSelectedRoute(routeId);
     setSelectedTruck(truckIdx);
-    setRoutesOpen(false);
   };
 
   const handleCloseTruckDetail = () => {
-    const routeId = selectedRoute;
     setSelectedTruck(null);
-    if (routeId) {
-      setTimeout(() => focusRoute?.(routeId), 50);
-    }
   };
 
   useEffect(() => {
@@ -168,35 +155,21 @@ function AppLayout() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
-      {!isMap && <AppSidebar isDark={isDark} toggle={toggle} onRoutesClick={() => setRoutesOpen(true)} />}
+      {!isMap && <AppSidebar isDark={isDark} toggle={toggle} />}
       <div className="relative flex-1 overflow-hidden">
         <Outlet />
         {isMap && selectedRoute && selectedTruck === null && (
-          <>
-            <div className="absolute top-6 left-6 z-50 flex flex-col gap-3 w-72 animate-in slide-in-from-left-4 fade-in duration-300">
-              <RouteInfoOverlay
-                routeId={selectedRoute}
-                onClose={() => {
-                  setSelectedRoute(null);
-                  setSelectedTruck(null);
-                  onOverviewClick?.();
-                }}
-                onRouteChange={handleRouteClick}
-              />
-            </div>
-            <div className="absolute bottom-6 left-6 z-50 w-80 animate-in slide-in-from-left-4 fade-in duration-300">
-              <TrucksOverlay
-                routeId={selectedRoute}
-                onTruckClick={handleTruckClick}
-                selectedTruckIdx={selectedTruck}
-              />
-            </div>
-            <RoutesPanel open={true} onOpenChange={setRoutesOpen} onRouteClick={handleRouteClick} />
-          </>
+          <div className="absolute bottom-6 left-6 z-50 w-80 animate-in slide-in-from-left-4 fade-in duration-300">
+            <TrucksOverlay
+              routeId={selectedRoute}
+              onTruckClick={handleTruckClick}
+              selectedTruckIdx={selectedTruck}
+            />
+          </div>
         )}
         {isMap && selectedRoute && selectedTruck !== null && (
           <>
-            <SwitchTruck routeId={selectedRoute} truckIdx={selectedTruck} onSwitch={(idx) => handleTruckClick(selectedRoute, idx)} />
+            <SwitchTruck routeId={selectedRoute} truckIdx={selectedTruck} onSwitch={handleTruckClick} />
             <RouteInfoCard routeId={selectedRoute} />
             <TruckDetailOverlay routeId={selectedRoute} truckIdx={selectedTruck} onClose={handleCloseTruckDetail} />
             <TruckDetailRouteCard routeId={selectedRoute} />

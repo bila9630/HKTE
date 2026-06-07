@@ -1,22 +1,32 @@
 import { ChevronLeft, ChevronRight, Truck } from "lucide-react";
 import { TRUCK_DATA } from "@/lib/routeConstants";
+import { ROUTE_CONFIGS } from "@/lib/truckRoutes";
 
 interface SwitchTruckProps {
   routeId: string;
   truckIdx: number;
-  onSwitch: (truckIdx: number) => void;
+  onSwitch: (routeId: string, truckIdx: number) => void;
 }
 
+const ALL_TRUCKS = ROUTE_CONFIGS.flatMap((cfg) =>
+  (TRUCK_DATA[cfg.id] ?? []).map((truck, idx) => ({ routeId: cfg.id, truckIdx: idx, truck }))
+);
+
 export function SwitchTruck({ routeId, truckIdx, onSwitch }: SwitchTruckProps) {
-  const trucks = TRUCK_DATA[routeId];
-  if (!trucks) return null;
+  const currentIdx = ALL_TRUCKS.findIndex((t) => t.routeId === routeId && t.truckIdx === truckIdx);
+  if (currentIdx === -1) return null;
 
-  const total = trucks.length;
-  const truck = trucks[truckIdx];
-  if (!truck) return null;
+  const total = ALL_TRUCKS.length;
+  const { truck } = ALL_TRUCKS[currentIdx];
 
-  const prev = () => onSwitch((truckIdx - 1 + total) % total);
-  const next = () => onSwitch((truckIdx + 1) % total);
+  const prev = () => {
+    const { routeId: r, truckIdx: t } = ALL_TRUCKS[(currentIdx - 1 + total) % total];
+    onSwitch(r, t);
+  };
+  const next = () => {
+    const { routeId: r, truckIdx: t } = ALL_TRUCKS[(currentIdx + 1) % total];
+    onSwitch(r, t);
+  };
 
   return (
     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-4 fade-in duration-200">
@@ -34,11 +44,11 @@ export function SwitchTruck({ routeId, truckIdx, onSwitch }: SwitchTruckProps) {
 
         <div className="flex flex-col items-center px-4 min-w-[140px]">
           <div className="flex items-center gap-1 mb-0.5">
-            <Truck size={9} className="text-blue-400" />
-            <span className="text-[9px] font-bold text-blue-400 tracking-widest uppercase">
+            <Truck size={9} style={{ color: truck.color }} />
+            <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: truck.color }}>
               {truck.id}
             </span>
-            <span className="text-[9px] text-white/20 ml-1">{truckIdx + 1}/{total}</span>
+            <span className="text-[9px] text-white/20 ml-1">{currentIdx + 1}/{total}</span>
           </div>
           <span className="text-sm font-semibold text-white/85 whitespace-nowrap leading-tight">
             {truck.plate}
