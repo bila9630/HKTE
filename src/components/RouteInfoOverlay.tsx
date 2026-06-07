@@ -142,7 +142,7 @@ export function TrucksOverlay({
           <h2 className="text-base font-bold text-white leading-tight">Fleet Status</h2>
         </div>
         <div className="h-px bg-white/8 mx-4" />
-        <div className="px-4 py-3 flex flex-col gap-1.5 max-h-52 overflow-y-auto">
+        <div className="px-4 py-3 flex flex-col gap-2 max-h-60 overflow-y-auto">
           {trucks.map((truck, idx) => (
             <div
               key={truck.id}

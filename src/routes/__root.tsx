@@ -138,12 +138,14 @@ function AppLayout() {
     focusRoute?.(routeId);
     setSelectedRoute(routeId);
     setSelectedTruck(null);
+    setRoutesOpen(true);
   };
 
   const handleTruckClick = (routeId: string, truckIdx: number) => {
     followTruck?.(routeId, truckIdx);
     setSelectedRoute(routeId);
     setSelectedTruck(truckIdx);
+    setRoutesOpen(false);
   };
 
   const handleCloseTruckDetail = () => {
@@ -168,10 +170,27 @@ function AppLayout() {
       <div className="relative flex-1 overflow-hidden">
         <Outlet />
         {isMap && selectedRoute && selectedTruck === null && (
-          <div className="absolute top-6 left-6 z-50 flex flex-col gap-3 w-72 animate-in slide-in-from-left-4 fade-in duration-300">
-            <RouteInfoOverlay routeId={selectedRoute} onClose={() => { setSelectedRoute(null); setSelectedTruck(null); onOverviewClick?.(); }} onRouteChange={handleRouteClick} />
-            <TrucksOverlay routeId={selectedRoute} onTruckClick={handleTruckClick} selectedTruckIdx={selectedTruck} />
-          </div>
+          <>
+            <div className="absolute top-6 left-6 z-50 flex flex-col gap-3 w-72 animate-in slide-in-from-left-4 fade-in duration-300">
+              <RouteInfoOverlay
+                routeId={selectedRoute}
+                onClose={() => {
+                  setSelectedRoute(null);
+                  setSelectedTruck(null);
+                  onOverviewClick?.();
+                }}
+                onRouteChange={handleRouteClick}
+              />
+            </div>
+            <div className="absolute bottom-6 left-6 z-50 w-80 animate-in slide-in-from-left-4 fade-in duration-300">
+              <TrucksOverlay
+                routeId={selectedRoute}
+                onTruckClick={handleTruckClick}
+                selectedTruckIdx={selectedTruck}
+              />
+            </div>
+            <RoutesPanel open={true} onOpenChange={setRoutesOpen} onRouteClick={handleRouteClick} />
+          </>
         )}
         {isMap && selectedRoute && selectedTruck !== null && (
           <>
@@ -185,9 +204,6 @@ function AppLayout() {
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50">
             <MapDock isDark={isDark} toggle={toggle} onOverviewClick={() => router.navigate({ to: '/dashboard' })} onRoutesClick={() => setRoutesOpen(true)} />
           </div>
-        )}
-        {isMap && (routesOpen || !selectedRoute) && (
-          <RoutesPanel open={true} onOpenChange={(v) => { if (!v && selectedRoute) setRoutesOpen(false); }} onRouteClick={handleRouteClick} />
         )}
       </div>
     </div>
