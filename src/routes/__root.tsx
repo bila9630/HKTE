@@ -181,8 +181,7 @@ function AppLayout() {
           <MapDock
             isDark={isDark}
             toggle={toggle}
-            onRoutesClick={() => setRoutesOpen(true)}
-            onPlanClick={() => setPlannerOpen((v) => !v)}
+onPlanClick={() => setPlannerOpen((v) => !v)}
           />
         </div>
       </div>
