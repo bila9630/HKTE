@@ -18,6 +18,8 @@ import { SwitchTruck } from "@/components/SwitchTruck";
 import { TruckDetailRouteCard } from "@/components/TruckDetailRouteCard";
 import { RoutePlanerCard } from "@/components/RoutePlanerCard";
 import { EnergyChartOverlay } from "@/components/EnergyChartOverlay";
+import { FleetOverviewCard } from "@/components/FleetOverviewCard";
+import { FleetActivityCard } from "@/components/FleetActivityCard";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -154,7 +156,9 @@ function AppLayout() {
     <div className="flex h-screen w-full overflow-hidden">
       <div className="relative flex-1 overflow-hidden">
         <Outlet />
+        {!selectedRoute && !plannerOpen && <FleetOverviewCard onTruckClick={handleTruckClick} />}
         {!selectedRoute && !plannerOpen && <EnergyChartOverlay />}
+        {!selectedRoute && !plannerOpen && <FleetActivityCard />}
         {selectedRoute && selectedTruck === null && (
           <div className="absolute bottom-6 left-6 z-50 w-80 animate-in slide-in-from-left-4 fade-in duration-300">
             <TrucksOverlay
