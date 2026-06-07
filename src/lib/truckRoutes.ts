@@ -70,17 +70,17 @@ export function buildTruckCollection(
   coords: [number, number][],
   progress: number[],
   directions: (1 | -1)[],
+  imageKeys: string[],
 ) {
   return {
     type: "FeatureCollection" as const,
     features: progress.map((t, i) => {
       const { position, bearing } = getPositionAndBearing(coords, t);
-      // Flip bearing 180° when travelling in reverse direction
       const rotation = directions[i] === 1 ? bearing : bearing + 180;
       return {
         type: "Feature" as const,
         geometry: { type: "Point" as const, coordinates: position },
-        properties: { id: i, bearing: rotation },
+        properties: { id: i, bearing: rotation, iconImage: imageKeys[i] },
       };
     }),
   };

@@ -2,6 +2,7 @@ import { useEffect, useImperativeHandle, useRef, forwardRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { ROUTE_CONFIGS, SPEED, buildTruckCollection, getPositionAndBearing, loadNavArrow } from "@/lib/truckRoutes";
+import { TRUCK_DATA } from "@/lib/routeConstants";
 
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoibWFwYm94OTYzMCIsImEiOiJjbWh4Y2lpOXAwMHZiMmxzOWVtaW1weTZvIn0.1lj2lcLygace2d9gcLnVMA";
@@ -10,7 +11,6 @@ const HK_CENTER: [number, number] = [114.1694, 22.3193];
 
 export interface MapHandle {
   flyToHongKong: () => void;
-  focusRoute: (routeId: string) => void;
   followTruck: (routeId: string, truckIdx: number) => void;
 }
 
@@ -31,11 +31,9 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
       const map = mapRef.current;
       if (!map) return;
       followingRef.current = null;
-      // Reset all route lines to default
       ROUTE_CONFIGS.forEach((r) => {
         if (map.getLayer(`route-line-${r.id}`)) {
-          map.setPaintProperty(`route-line-${r.id}`, "line-opacity", 0.5);
-          map.setPaintProperty(`route-line-${r.id}`, "line-width", 2);
+          map.setLayoutProperty(`route-line-${r.id}`, "visibility", "none");
         }
         if (map.getLayer(`trucks-layer-${r.id}`)) {
           map.setLayoutProperty(`trucks-layer-${r.id}`, "visibility", "visible");
@@ -50,32 +48,6 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
         essential: true,
       });
     },
-    focusRoute: (routeId: string) => {
-      const map = mapRef.current;
-      if (!map) return;
-      const cfg = ROUTE_CONFIGS.find((r) => r.id === routeId);
-      if (!cfg) return;
-
-      // Stop following
-      followingRef.current = null;
-
-      // Reset all route lines and truck visibility
-      ROUTE_CONFIGS.forEach((r) => {
-        if (map.getLayer(`route-line-${r.id}`)) {
-          map.setPaintProperty(`route-line-${r.id}`, "line-opacity", r.id === routeId ? 1 : 0.2);
-          map.setPaintProperty(`route-line-${r.id}`, "line-width", r.id === routeId ? 5 : 2);
-        }
-        if (map.getLayer(`trucks-layer-${r.id}`)) {
-          map.setLayoutProperty(`trucks-layer-${r.id}`, "visibility", r.id === routeId ? "visible" : "none");
-        }
-      });
-
-      // Fit bounds to the selected route
-      const bounds = new mapboxgl.LngLatBounds();
-      bounds.extend(cfg.from);
-      bounds.extend(cfg.to);
-      map.fitBounds(bounds, { padding: 100, duration: 2000, pitch: 0 });
-    },
     followTruck: (routeId: string, truckIdx: number) => {
       const map = mapRef.current;
       if (!map) return;
@@ -83,7 +55,13 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
       if (routeIdx === -1) return;
       followingRef.current = { routeIdx, truckIdx };
 
-      // Get the truck's current position from state
+      // Show only the followed route's line, hide others
+      ROUTE_CONFIGS.forEach((r) => {
+        if (map.getLayer(`route-line-${r.id}`)) {
+          map.setLayoutProperty(`route-line-${r.id}`, "visibility", r.id === routeId ? "visible" : "none");
+        }
+      });
+
       const state = routeStateRef.current[routeIdx];
       if (state && truckIdx < state.progress.length) {
         const { position, bearing } = getPositionAndBearing(state.coords, state.progress[truckIdx]);
@@ -164,10 +142,17 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
         });
       }, 500);
 
-      Promise.all(ROUTE_CONFIGS.map((cfg) => loadNavArrow(cfg.truckColor)))
+      const truckImageTasks = ROUTE_CONFIGS.flatMap((cfg) =>
+        (TRUCK_DATA[cfg.id] ?? []).map((truck, truckIdx) => ({
+          key: `truck-${cfg.id}-${truckIdx}`,
+          color: truck.color,
+        }))
+      );
+
+      Promise.all(truckImageTasks.map((t) => loadNavArrow(t.color)))
         .then((images) => {
-          images.forEach((img, idx) => {
-            map.addImage(`truck-${ROUTE_CONFIGS[idx].id}`, img);
+          images.forEach((img, i) => {
+            map.addImage(truckImageTasks[i].key, img);
           });
 
           const routeState = ROUTE_CONFIGS.map((cfg) => ({
@@ -195,24 +180,26 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
               id: `route-line-${cfg.id}`,
               type: "line",
               source: `route-${cfg.id}`,
+              layout: { "visibility": "none" },
               paint: {
                 "line-color": cfg.lineColor,
                 "line-width": 2,
-                "line-opacity": 0.5,
+                "line-opacity": 0.8,
                 "line-dasharray": [2, 3],
               },
             });
 
+            const imageKeys = Array.from({ length: cfg.numTrucks }, (_, i) => `truck-${cfg.id}-${i}`);
             map.addSource(`trucks-${cfg.id}`, {
               type: "geojson",
-              data: buildTruckCollection(state.coords, state.progress, state.directions),
+              data: buildTruckCollection(state.coords, state.progress, state.directions, imageKeys),
             });
             map.addLayer({
               id: `trucks-layer-${cfg.id}`,
               type: "symbol",
               source: `trucks-${cfg.id}`,
               layout: {
-                "icon-image": `truck-${cfg.id}`,
+                "icon-image": ["get", "iconImage"],
                 "icon-size": 1,
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
@@ -301,8 +288,9 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
                   state.directions[i] = 1;
                 }
               }
+              const animImageKeys = Array.from({ length: cfg.numTrucks }, (_, i) => `truck-${cfg.id}-${i}`);
               (map.getSource(`trucks-${cfg.id}`) as mapboxgl.GeoJSONSource).setData(
-                buildTruckCollection(state.coords, state.progress, state.directions),
+                buildTruckCollection(state.coords, state.progress, state.directions, animImageKeys),
               );
             });
 

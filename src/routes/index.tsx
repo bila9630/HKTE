@@ -17,17 +17,12 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const mapRef = useRef<MapHandle>(null);
-  const { setOverviewClick, setFocusRoute, setFollowTruck, onMapTruckClick } = useMapActions();
+  const { setOverviewClick, setFollowTruck, onMapTruckClick } = useMapActions();
 
   useEffect(() => {
     setOverviewClick(() => mapRef.current?.flyToHongKong());
     return () => setOverviewClick(undefined);
   }, [setOverviewClick]);
-
-  useEffect(() => {
-    setFocusRoute((routeId: string) => mapRef.current?.focusRoute(routeId));
-    return () => setFocusRoute(undefined);
-  }, [setFocusRoute]);
 
   useEffect(() => {
     setFollowTruck((routeId: string, truckIdx: number) => mapRef.current?.followTruck(routeId, truckIdx));

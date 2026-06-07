@@ -7,22 +7,23 @@ export const TRUCK_DATA: Record<
     status: "delivering" | "returning" | "charging";
     speed: number;
     trips: number;
+    color: string;
   }[]
 > = {
   sz: [
-    { id: "SZ-01", plate: "粤B·T2841", battery: 78, status: "delivering", speed: 45, trips: 3 },
-    { id: "SZ-02", plate: "粤B·K9012", battery: 45, status: "returning", speed: 52, trips: 2 },
-    { id: "SZ-03", plate: "粤B·M3356", battery: 92, status: "delivering", speed: 38, trips: 4 },
+    { id: "SZ-01", plate: "粤B·T2841", battery: 78, status: "delivering", speed: 45, trips: 3, color: "#f59e0b" },
+    { id: "SZ-02", plate: "粤B·K9012", battery: 45, status: "returning", speed: 52, trips: 2, color: "#fb923c" },
+    { id: "SZ-03", plate: "粤B·M3356", battery: 92, status: "delivering", speed: 38, trips: 4, color: "#ef4444" },
   ],
   yantian: [
-    { id: "YT-01", plate: "粤B·D4418", battery: 88, status: "delivering", speed: 41, trips: 4 },
-    { id: "YT-02", plate: "粤B·F6623", battery: 34, status: "returning", speed: 58, trips: 2 },
-    { id: "YT-03", plate: "粤B·H1190", battery: 71, status: "delivering", speed: 43, trips: 3 },
+    { id: "YT-01", plate: "粤B·D4418", battery: 88, status: "delivering", speed: 41, trips: 4, color: "#10b981" },
+    { id: "YT-02", plate: "粤B·F6623", battery: 34, status: "returning", speed: 58, trips: 2, color: "#06b6d4" },
+    { id: "YT-03", plate: "粤B·H1190", battery: 71, status: "delivering", speed: 43, trips: 3, color: "#3b82f6" },
   ],
   nanshan: [
-    { id: "NS-01", plate: "粤B·J8845", battery: 56, status: "delivering", speed: 39, trips: 2 },
-    { id: "NS-02", plate: "粤B·L2278", battery: 22, status: "delivering", speed: 0, trips: 1 },
-    { id: "NS-03", plate: "粤B·N9934", battery: 81, status: "returning", speed: 51, trips: 3 },
+    { id: "NS-01", plate: "粤B·J8845", battery: 56, status: "delivering", speed: 39, trips: 2, color: "#8b5cf6" },
+    { id: "NS-02", plate: "粤B·L2278", battery: 22, status: "delivering", speed: 0, trips: 1, color: "#ec4899" },
+    { id: "NS-03", plate: "粤B·N9934", battery: 81, status: "returning", speed: 51, trips: 3, color: "#f43f5e" },
   ],
 };
 
