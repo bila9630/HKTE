@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const mapRef = useRef<MapHandle>(null);
-  const { setOverviewClick, setFocusRoute, setFollowTruck, onMapTruckClick } = useMapActions();
+  const { setOverviewClick, setFocusRoute, setFollowTruck, setFlyToLocation, setShowPlannedRoute, setClearPlannedRoute, onMapTruckClick } = useMapActions();
 
   useEffect(() => {
     setOverviewClick(() => mapRef.current?.flyToHongKong());
@@ -33,6 +33,21 @@ function Index() {
     setFollowTruck((routeId: string, truckIdx: number) => mapRef.current?.followTruck(routeId, truckIdx));
     return () => setFollowTruck(undefined);
   }, [setFollowTruck]);
+
+  useEffect(() => {
+    setFlyToLocation((lng: number, lat: number) => mapRef.current?.flyToLocation(lng, lat));
+    return () => setFlyToLocation(undefined);
+  }, [setFlyToLocation]);
+
+  useEffect(() => {
+    setShowPlannedRoute((from: [number, number], to: [number, number]) => mapRef.current?.showPlannedRoute(from, to));
+    return () => setShowPlannedRoute(undefined);
+  }, [setShowPlannedRoute]);
+
+  useEffect(() => {
+    setClearPlannedRoute(() => mapRef.current?.clearPlannedRoute());
+    return () => setClearPlannedRoute(undefined);
+  }, [setClearPlannedRoute]);
 
   return <Map ref={mapRef} onTruckClick={(routeId, truckIdx) => onMapTruckClick?.(routeId, truckIdx)} />;
 }

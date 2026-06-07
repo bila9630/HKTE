@@ -9,6 +9,12 @@ interface MapActionsContextType {
   setFollowTruck: (fn: ((routeId: string, truckIdx: number) => void) | undefined) => void;
   onMapTruckClick?: (routeId: string, truckIdx: number) => void;
   setOnMapTruckClick: (fn: ((routeId: string, truckIdx: number) => void) | undefined) => void;
+  flyToLocation?: (lng: number, lat: number) => void;
+  setFlyToLocation: (fn: ((lng: number, lat: number) => void) | undefined) => void;
+  showPlannedRoute?: (from: [number, number], to: [number, number]) => void;
+  setShowPlannedRoute: (fn: ((from: [number, number], to: [number, number]) => void) | undefined) => void;
+  clearPlannedRoute?: () => void;
+  setClearPlannedRoute: (fn: (() => void) | undefined) => void;
 }
 
 const MapActionsContext = createContext<MapActionsContextType>({
@@ -16,6 +22,9 @@ const MapActionsContext = createContext<MapActionsContextType>({
   setFocusRoute: () => {},
   setFollowTruck: () => {},
   setOnMapTruckClick: () => {},
+  setFlyToLocation: () => {},
+  setShowPlannedRoute: () => {},
+  setClearPlannedRoute: () => {},
 });
 
 export function MapActionsProvider({ children }: { children: ReactNode }) {
@@ -23,6 +32,9 @@ export function MapActionsProvider({ children }: { children: ReactNode }) {
   const [focusRoute, setFocusRouteState] = useState<((routeId: string) => void) | undefined>(undefined);
   const [followTruck, setFollowTruckState] = useState<((routeId: string, truckIdx: number) => void) | undefined>(undefined);
   const [onMapTruckClick, setOnMapTruckClickState] = useState<((routeId: string, truckIdx: number) => void) | undefined>(undefined);
+  const [flyToLocation, setFlyToLocationState] = useState<((lng: number, lat: number) => void) | undefined>(undefined);
+  const [showPlannedRoute, setShowPlannedRouteState] = useState<((from: [number, number], to: [number, number]) => void) | undefined>(undefined);
+  const [clearPlannedRoute, setClearPlannedRouteState] = useState<(() => void) | undefined>(undefined);
 
   const setOverviewClick = useCallback((fn: (() => void) | undefined) => {
     setOnOverviewClick(() => fn);
@@ -40,8 +52,20 @@ export function MapActionsProvider({ children }: { children: ReactNode }) {
     setOnMapTruckClickState(() => fn);
   }, []);
 
+  const setFlyToLocation = useCallback((fn: ((lng: number, lat: number) => void) | undefined) => {
+    setFlyToLocationState(() => fn);
+  }, []);
+
+  const setShowPlannedRoute = useCallback((fn: ((from: [number, number], to: [number, number]) => void) | undefined) => {
+    setShowPlannedRouteState(() => fn);
+  }, []);
+
+  const setClearPlannedRoute = useCallback((fn: (() => void) | undefined) => {
+    setClearPlannedRouteState(() => fn);
+  }, []);
+
   return (
-    <MapActionsContext.Provider value={{ onOverviewClick, setOverviewClick, focusRoute, setFocusRoute, followTruck, setFollowTruck, onMapTruckClick, setOnMapTruckClick }}>
+    <MapActionsContext.Provider value={{ onOverviewClick, setOverviewClick, focusRoute, setFocusRoute, followTruck, setFollowTruck, onMapTruckClick, setOnMapTruckClick, flyToLocation, setFlyToLocation, showPlannedRoute, setShowPlannedRoute, clearPlannedRoute, setClearPlannedRoute }}>
       {children}
     </MapActionsContext.Provider>
   );

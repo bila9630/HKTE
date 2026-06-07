@@ -12,6 +12,9 @@ export interface MapHandle {
   flyToHongKong: () => void;
   focusRoute: (routeId: string) => void;
   followTruck: (routeId: string, truckIdx: number) => void;
+  flyToLocation: (lng: number, lat: number) => void;
+  showPlannedRoute: (from: [number, number], to: [number, number]) => void;
+  clearPlannedRoute: () => void;
 }
 
 interface MapProps {
@@ -24,6 +27,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
   const followingRef = useRef<{ routeIdx: number; truckIdx: number } | null>(null);
   const routeStateRef = useRef<{ coords: [number, number][]; progress: number[]; directions: (1 | -1)[] }[]>([]);
   const onTruckClickRef = useRef(onTruckClick);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
   onTruckClickRef.current = onTruckClick;
 
   useImperativeHandle(ref, () => ({
@@ -31,6 +35,22 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
       const map = mapRef.current;
       if (!map) return;
       followingRef.current = null;
+      // Remove location marker if present
+      if (markerRef.current) {
+        markerRef.current.remove();
+        markerRef.current = null;
+      }
+      // Remove highlighted building
+      if (map.getLayer("highlighted-building")) map.removeLayer("highlighted-building");
+      if (map.getSource("highlighted-building")) map.removeSource("highlighted-building");
+      // Remove planned route if present
+      if (map.getLayer("planned-route-line")) map.removeLayer("planned-route-line");
+      if (map.getSource("planned-route")) map.removeSource("planned-route");
+      if ((map as any)._plannedStartMarker) { (map as any)._plannedStartMarker.remove(); (map as any)._plannedStartMarker = null; }
+      if ((map as any)._plannedStopMarkers) {
+        (map as any)._plannedStopMarkers.forEach((m: mapboxgl.Marker) => m.remove());
+        (map as any)._plannedStopMarkers = null;
+      }
       // Reset all route lines to default
       ROUTE_CONFIGS.forEach((r) => {
         if (map.getLayer(`route-line-${r.id}`)) {
@@ -97,6 +117,203 @@ const Map = forwardRef<MapHandle, MapProps>(function Map({ onTruckClick }, ref) 
           essential: true,
         });
       }
+    },
+    flyToLocation: (lng: number, lat: number) => {
+      const map = mapRef.current;
+      if (!map) return;
+      followingRef.current = null;
+
+      // Remove old marker if any
+      if (markerRef.current) {
+        markerRef.current.remove();
+        markerRef.current = null;
+      }
+
+      // Fly to location first, then highlight building on arrival
+      map.flyTo({
+        center: [lng, lat],
+        zoom: 16,
+        pitch: 60,
+        bearing: -20,
+        duration: 2000,
+        essential: true,
+      });
+
+      // Highlight building after flyTo completes
+      map.once("moveend", () => {
+        // Query building features at the target point
+        const point = map.project([lng, lat]);
+        const features = map.queryRenderedFeatures(
+          [
+            [point.x - 20, point.y - 20],
+            [point.x + 20, point.y + 20],
+          ],
+          { layers: ["3d-buildings"] }
+        );
+
+        // Remove previous highlight layer
+        if (map.getLayer("highlighted-building")) map.removeLayer("highlighted-building");
+        if (map.getSource("highlighted-building")) map.removeSource("highlighted-building");
+
+        if (features.length > 0) {
+          // Use the first building's geometry
+          const buildingFeature = features[0];
+          map.addSource("highlighted-building", {
+            type: "geojson",
+            data: {
+              type: "Feature",
+              geometry: buildingFeature.geometry,
+              properties: buildingFeature.properties,
+            } as GeoJSON.Feature,
+          });
+          map.addLayer({
+            id: "highlighted-building",
+            type: "fill-extrusion",
+            source: "highlighted-building",
+            paint: {
+              "fill-extrusion-color": "#3b82f6",
+              "fill-extrusion-height": (buildingFeature.properties?.height as number) || 20,
+              "fill-extrusion-base": (buildingFeature.properties?.min_height as number) || 0,
+              "fill-extrusion-opacity": 0.9,
+            },
+          });
+        }
+      });
+    },
+    showPlannedRoute: (from: [number, number], to: [number, number]) => {
+      const map = mapRef.current;
+      if (!map) return;
+      followingRef.current = null;
+
+      // Hide all existing routes and trucks
+      ROUTE_CONFIGS.forEach((r) => {
+        if (map.getLayer(`route-line-${r.id}`)) {
+          map.setPaintProperty(`route-line-${r.id}`, "line-opacity", 0);
+        }
+        if (map.getLayer(`trucks-layer-${r.id}`)) {
+          map.setLayoutProperty(`trucks-layer-${r.id}`, "visibility", "none");
+        }
+        if (map.getLayer(`waypoints-layer-${r.id}`)) {
+          map.setPaintProperty(`waypoints-layer-${r.id}`, "circle-opacity", 0);
+          map.setPaintProperty(`waypoints-layer-${r.id}`, "circle-stroke-opacity", 0);
+        }
+      });
+
+      // Remove existing marker
+      if (markerRef.current) {
+        markerRef.current.remove();
+        markerRef.current = null;
+      }
+
+      // Immediately fit bounds to show both points
+      const bounds = new mapboxgl.LngLatBounds();
+      bounds.extend(from);
+      bounds.extend(to);
+      map.fitBounds(bounds, { padding: 200, pitch: 45, duration: 1500 });
+
+      const url =
+        `https://api.mapbox.com/directions/v5/mapbox/driving/` +
+        `${from[0]},${from[1]};${to[0]},${to[1]}` +
+        `?geometries=geojson&overview=full&access_token=${MAPBOX_TOKEN}`;
+
+      fetch(url)
+        .then((r) => r.json())
+        .then((data) => {
+          const coords = data?.routes?.[0]?.geometry?.coordinates;
+          if (!coords?.length) return;
+
+          // Update or add planned route source/layer
+          if (map.getSource("planned-route")) {
+            (map.getSource("planned-route") as mapboxgl.GeoJSONSource).setData({
+              type: "Feature",
+              geometry: { type: "LineString", coordinates: coords },
+              properties: {},
+            });
+          } else {
+            map.addSource("planned-route", {
+              type: "geojson",
+              data: {
+                type: "Feature",
+                geometry: { type: "LineString", coordinates: coords },
+                properties: {},
+              },
+            });
+            map.addLayer({
+              id: "planned-route-line",
+              type: "line",
+              source: "planned-route",
+              paint: {
+                "line-color": "#3b82f6",
+                "line-width": 4,
+                "line-opacity": 0.9,
+              },
+              layout: {
+                "line-cap": "round",
+                "line-join": "round",
+              },
+            });
+          }
+
+          // Add start/end markers
+          if (markerRef.current) markerRef.current.remove();
+          // Use two markers stored in an array-like approach
+          const startMarker = new mapboxgl.Marker({ color: "#22c55e" }).setLngLat(from).addTo(map);
+          const endMarker = new mapboxgl.Marker({ color: "#ef4444" }).setLngLat(to).addTo(map);
+          // Store end marker in markerRef for cleanup; store start in a data attribute
+          markerRef.current = endMarker;
+          (map as any)._plannedStartMarker = startMarker;
+
+          // Add intermediate stop points along the route (at 1/3 and 2/3)
+          const stopPositions = [
+            coords[Math.floor(coords.length * 0.33)],
+            coords[Math.floor(coords.length * 0.66)],
+          ];
+          const stopMarkers = stopPositions.map((pos: [number, number]) => {
+            const el = document.createElement("div");
+            el.className = "planned-stop-marker";
+            el.style.width = "14px";
+            el.style.height = "14px";
+            el.style.borderRadius = "50%";
+            el.style.border = "2.5px solid white";
+            el.style.backgroundColor = "#facc15";
+            el.style.boxShadow = "0 0 6px rgba(250,204,21,0.5)";
+            return new mapboxgl.Marker({ element: el }).setLngLat(pos).addTo(map);
+          });
+          (map as any)._plannedStopMarkers = stopMarkers;
+
+          // Fit bounds to show the whole route
+          const bounds = new mapboxgl.LngLatBounds();
+          coords.forEach((c: [number, number]) => bounds.extend(c));
+          map.fitBounds(bounds, { padding: 200, pitch: 45, duration: 2000 });
+        })
+        .catch((err) => console.error("[Map] Planned route fetch failed:", err));
+    },
+    clearPlannedRoute: () => {
+      const map = mapRef.current;
+      if (!map) return;
+      if (map.getLayer("planned-route-line")) map.removeLayer("planned-route-line");
+      if (map.getSource("planned-route")) map.removeSource("planned-route");
+      if (map.getLayer("highlighted-building")) map.removeLayer("highlighted-building");
+      if (map.getSource("highlighted-building")) map.removeSource("highlighted-building");
+      if (markerRef.current) { markerRef.current.remove(); markerRef.current = null; }
+      if ((map as any)._plannedStartMarker) { (map as any)._plannedStartMarker.remove(); (map as any)._plannedStartMarker = null; }
+      if ((map as any)._plannedStopMarkers) {
+        (map as any)._plannedStopMarkers.forEach((m: mapboxgl.Marker) => m.remove());
+        (map as any)._plannedStopMarkers = null;
+      }
+      // Restore all routes and trucks
+      ROUTE_CONFIGS.forEach((r) => {
+        if (map.getLayer(`route-line-${r.id}`)) {
+          map.setPaintProperty(`route-line-${r.id}`, "line-opacity", 0.5);
+        }
+        if (map.getLayer(`trucks-layer-${r.id}`)) {
+          map.setLayoutProperty(`trucks-layer-${r.id}`, "visibility", "visible");
+        }
+        if (map.getLayer(`waypoints-layer-${r.id}`)) {
+          map.setPaintProperty(`waypoints-layer-${r.id}`, "circle-opacity", 0.9);
+          map.setPaintProperty(`waypoints-layer-${r.id}`, "circle-stroke-opacity", 1);
+        }
+      });
     },
   }));
 

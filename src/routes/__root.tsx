@@ -18,6 +18,7 @@ import { TruckDetailOverlay } from "@/components/TruckDetailOverlay";
 import { RouteInfoCard } from "@/components/RouteInfoCard";
 import { SwitchTruck } from "@/components/SwitchTruck";
 import { TruckDetailRouteCard } from "@/components/TruckDetailRouteCard";
+import { RoutePlanerCard } from "@/components/RoutePlanerCard";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -128,6 +129,7 @@ function AppLayout() {
   const { focusRoute, followTruck, setOnMapTruckClick, onOverviewClick } = useMapActions();
   const router = useRouter();
   const [routesOpen, setRoutesOpen] = useState(false);
+  const [plannerOpen, setPlannerOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
   const [selectedTruck, setSelectedTruck] = useState<number | null>(null);
 
@@ -200,9 +202,12 @@ function AppLayout() {
             <TruckDetailRouteCard routeId={selectedRoute} />
           </>
         )}
+        {isMap && plannerOpen && (
+          <RoutePlanerCard onClose={() => setPlannerOpen(false)} />
+        )}
         {isMap && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50">
-            <MapDock isDark={isDark} toggle={toggle} onOverviewClick={() => router.navigate({ to: '/dashboard' })} onRoutesClick={() => setRoutesOpen(true)} />
+            <MapDock isDark={isDark} toggle={toggle} onOverviewClick={() => router.navigate({ to: '/dashboard' })} onRoutesClick={() => setRoutesOpen(true)} onPlanClick={() => setPlannerOpen((v) => !v)} />
           </div>
         )}
       </div>

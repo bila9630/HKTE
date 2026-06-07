@@ -11,13 +11,14 @@ interface MapDockProps {
   toggle?: () => void;
   onOverviewClick?: () => void;
   onRoutesClick?: () => void;
+  onPlanClick?: () => void;
 }
 
-export function MapDock({ isDark, toggle, onOverviewClick, onRoutesClick }: MapDockProps) {
+export function MapDock({ isDark, toggle, onOverviewClick, onRoutesClick, onPlanClick }: MapDockProps) {
   const navItems = [
     { icon: HomeIcon, label: "Overview", onClick: onOverviewClick },
     { icon: LocateIcon, label: "Routes", onClick: onRoutesClick },
-    { icon: FileTextIcon, label: "Document", onClick: undefined },
+    { icon: FileTextIcon, label: "Plan Trip", onClick: onPlanClick },
   ];
 
   return (
