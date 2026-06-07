@@ -2,7 +2,7 @@
 
 ## Development Declaration
 
-This project (HKTE - Hong Kong Truck Explorer) was conceptualized and developed entirely during the hackathon timeframe.
+This project (GridFlow) was conceptualized and developed entirely during the hackathon timeframe.
 
 ### Prior Experience
 
@@ -15,7 +15,7 @@ Our team entered the hackathon with prior experience using Mapbox GL from other 
 
 While our prior experience with spatial visualization informed our architecture, the implementation submitted for this project is entirely original. 
 
-To maximize our output during the limited hackathon window, we utilized AI coding assistants as part of our development workflow. These tools were used to help scaffold boilerplate code, accelerate the translation of our mathematical optimization logic (the Simplex solver) into JavaScript, and refine the Tailwind/Radix UI components. 
+To maximize our output during the limited hackathon window, we utilized AI coding assistants as part of our development workflow. 
 
 No pre-existing Mapbox codebase, private templates, or proprietary logistics software from previous projects were copied or reused. Every line of React/TypeScript, the specific route optimization logic, and the TanStack Start integration were built specifically for this event.
 
