@@ -18,6 +18,7 @@ import { RouteInfoCard } from "@/components/RouteInfoCard";
 import { SwitchTruck } from "@/components/SwitchTruck";
 import { TruckDetailRouteCard } from "@/components/TruckDetailRouteCard";
 import { RoutePlanerCard } from "@/components/RoutePlanerCard";
+import { EnergyChartOverlay } from "@/components/EnergyChartOverlay";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -160,6 +161,9 @@ function AppLayout() {
       {!isMap && <AppSidebar isDark={isDark} toggle={toggle} />}
       <div className="relative flex-1 overflow-hidden">
         <Outlet />
+        {isMap && !selectedRoute && !plannerOpen && (
+          <EnergyChartOverlay />
+        )}
         {isMap && selectedRoute && selectedTruck === null && (
           <div className="absolute bottom-6 left-6 z-50 w-80 animate-in slide-in-from-left-4 fade-in duration-300">
             <TrucksOverlay
