@@ -2,6 +2,8 @@
 > **HKTE x EuroTech Hackathon**
 
 GridFlow is an application that enables Vehicle-to-Building (V2B) and Vehicle-to-Grid (V2G) systems.
+<img width="1918" height="910" alt="Screenshot 2026-06-07 110358" src="https://github.com/user-attachments/assets/dde591c2-954e-4a6d-b7db-1fc236497d0c" />
+
 
 ### V2G Concept
 Energy prices are constantly fluctuating, influenced by factors such as weather conditions and electricity demand. When renewable energy sources like solar and wind generate abundant power, electricity prices tend to fall. However, prices can rise significantly during periods of low renewable generation or when demand peaks, such as when large numbers of people charge their devices or electric vehicles.
@@ -37,6 +39,12 @@ GridFlow helps logistics providers transform this surplus energy into a new reve
 *   **Build & Deploy:** Vite running on Vercel
 
 ---
+## More Screenshots of our app
+<img width="1917" height="906" alt="Screenshot 2026-06-07 110439" src="https://github.com/user-attachments/assets/690e476a-3c1d-41e1-91e1-db061d40decc" />
+<img width="1918" height="907" alt="Screenshot 2026-06-07 110535" src="https://github.com/user-attachments/assets/63771a8d-fc56-4ed2-a51c-bb3f55b4a5e8" />
+
+
+
 
 ## 📦 Project Structure
 
